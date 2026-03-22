@@ -1170,6 +1170,14 @@ body {
   background: radial-gradient(ellipse at center top, rgba(0,0,0,0.15) 20%, rgba(0,0,0,0.45) 100%);
   pointer-events: none;
 }
+/* Mobile: heavy blur so only path + pins are visible */
+@media (max-width: 768px) {
+  .timeline-overlay {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
 
 /* SVG winding path */
 #timeline-svg {
@@ -1493,6 +1501,17 @@ body {
 
   /* Timeline SVG: fill viewport on mobile */
   #timeline-svg { width: 100%; height: 100%; }
+
+  /* Thicker, glowier path on dark blurred background */
+  .timeline-path {
+    stroke-width: 4;
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.3));
+  }
+  .timeline-path-bg {
+    stroke-width: 3;
+    stroke: rgba(255, 215, 0, 0.08);
+  }
+  .timeline-dot { filter: drop-shadow(0 0 12px var(--gold)) drop-shadow(0 0 24px var(--gold)); }
 
   .event-card { padding: 20px 24px; }
   .event-card-meta { grid-template-columns: 1fr 1fr; }
@@ -3098,9 +3117,9 @@ const tlEvents = [
 // Desktop path data — DO NOT CHANGE
 const TL_PATH_DESKTOP = "M 499,306 C 500,309 509,317 507,323 C 505,329 484,336 485,344 C 486,352 512,358 511,369 C 510,380 483,398 480,412 C 478,426 488,443 496,454 C 504,465 520,468 530,477 C 540,486 555,494 555,506 C 555,518 540,533 532,548 C 524,563 510,577 509,594 C 508,611 518,631 525,648 C 532,666 551,681 550,699 C 549,717 531,734 520,755 C 509,776 490,798 482,823 C 474,848 472,885 472,906 C 472,928 480,944 482,952";
 
-// Mobile path data — traced on 1080x2340 phone (CSS viewport ~386x836)
-// Points 1-9 from user, points 10-11 extrapolated to complete the snake
-const TL_PATH_MOBILE = "M 513,316 C 513,333 481,333 449,350 S 503,360 556,371 S 502,390 447,409 S 470,434 493,459 S 574,478 655,498 S 599,540 543,583 S 601,629 659,676 S 636,709 614,742 S 559,764 504,786 S 440,830 420,870 S 450,920 480,960";
+// Mobile path — aesthetic centered snake (blurred bg, no need to trace video)
+// Designed in a 0-1000 x 0-1000 space, snaking left-right centered around x=500
+const TL_PATH_MOBILE = "M 500,50 C 500,70 620,80 650,120 S 580,180 500,200 S 380,230 350,280 S 420,340 500,370 S 620,400 650,450 S 580,510 500,540 S 380,570 350,620 S 420,680 500,710 S 620,740 650,790 S 580,840 500,870 S 420,910 450,950";
 
 const tlSvg = document.getElementById('timeline-svg');
 const tlPathBg = document.getElementById('tl-path-bg');
@@ -3111,48 +3130,16 @@ function isMobileTimeline() {
 }
 
 function svgPointToViewport(svgX, svgY) {
-  // Convert SVG coords to viewport percentages using the SVG's screen CTM
   const pt = tlSvg.createSVGPoint();
   pt.x = svgX;
   pt.y = svgY;
   const ctm = tlSvg.getScreenCTM();
-  if (!ctm) return { x: svgX / 10, y: svgY / 10 }; // fallback
+  if (!ctm) return { x: svgX / 10, y: svgY / 10 };
   const screenPt = pt.matrixTransform(ctm);
   return {
     x: (screenPt.x / window.innerWidth) * 100,
     y: (screenPt.y / window.innerHeight) * 100
   };
-}
-
-function getMobileViewBox() {
-  // Build a viewBox that matches the phone's aspect ratio, centered on the path.
-  // This ensures the path fills the screen on any phone size.
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
-  // Path bounds: x ~420-660 (w=240), y ~316-960 (h=644)
-  // Add generous padding: x 380-700 (w=320), y 280-1000 (h=720)
-  const pathCX = 540;  // horizontal center of path
-  const pathCY = 640;  // vertical center of path
-  const padW = 320;    // padded width around path
-  const padH = 720;    // padded height around path
-
-  // Match viewBox aspect ratio to the phone's actual aspect ratio
-  const phoneAspect = vw / vh;
-  const pathAspect = padW / padH;
-
-  let vbW, vbH;
-  if (phoneAspect > pathAspect) {
-    // Phone is wider — expand width
-    vbH = padH;
-    vbW = padH * phoneAspect;
-  } else {
-    // Phone is taller — expand height
-    vbW = padW;
-    vbH = padW / phoneAspect;
-  }
-
-  return `${pathCX - vbW / 2} ${pathCY - vbH / 2} ${vbW} ${vbH}`;
 }
 
 function applyTimelinePath() {
@@ -3163,18 +3150,20 @@ function applyTimelinePath() {
   tlPathBg.setAttribute('d', pathData);
 
   if (mobile) {
-    // Dynamic viewBox that matches phone aspect ratio, centered on path
-    tlSvg.setAttribute('viewBox', getMobileViewBox());
+    // Portrait viewBox — taller to match phone aspect, centered on the snake
+    const phoneAspect = window.innerWidth / window.innerHeight;
+    // Path spans x:350-650 (w:300), y:50-950 (h:900). Center: 500,500
+    const vbH = 1000;
+    const vbW = vbH * phoneAspect;
+    const vbX = 500 - vbW / 2;
+    tlSvg.setAttribute('viewBox', `${vbX} 0 ${vbW} ${vbH}`);
     tlSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   } else {
-    // Desktop: original square viewBox
     tlSvg.setAttribute('viewBox', '0 0 1000 1000');
     tlSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   }
 
   tlIsMobile = mobile;
-
-  // Reset path length so it recalculates
   tlPathLength = 0;
 }
 
