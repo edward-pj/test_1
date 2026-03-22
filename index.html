@@ -3502,18 +3502,38 @@ window.addEventListener('resize', setVH);
   }
   update();
 
-  // --- PATH DRAWING MODE ---
-  // Press 'D' to toggle draw mode. Click to place points. Press 'C' to copy path. Press 'X' to clear.
+  // --- MOBILE PATH EDITOR ---
+  // Touch-friendly: tap to place points, on-screen buttons for controls
   let drawMode = false;
   let drawPoints = [];
+  let dragIdx = -1; // which point is being dragged (-1 = none)
+
   const drawCanvas = document.createElement('canvas');
   drawCanvas.id = 'draw-canvas';
   drawCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:9998;pointer-events:none;';
   document.body.appendChild(drawCanvas);
   const drawCtx = drawCanvas.getContext('2d');
 
+  // Floating toolbar (touch-friendly buttons)
+  const toolbar = document.createElement('div');
+  toolbar.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10001;display:none;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;';
+  toolbar.innerHTML = `
+    <button id="dbg-undo" style="font:bold 13px monospace;padding:10px 16px;background:#222;color:#ff0;border:2px solid #ff0;border-radius:8px;touch-action:manipulation;">⟲ UNDO</button>
+    <button id="dbg-clear" style="font:bold 13px monospace;padding:10px 16px;background:#222;color:#f44;border:2px solid #f44;border-radius:8px;touch-action:manipulation;">✕ CLEAR</button>
+    <button id="dbg-copy" style="font:bold 13px monospace;padding:10px 16px;background:#222;color:#0f0;border:2px solid #0f0;border-radius:8px;touch-action:manipulation;">📋 COPY PATH</button>
+    <button id="dbg-done" style="font:bold 13px monospace;padding:10px 16px;background:#222;color:#fff;border:2px solid #fff;border-radius:8px;touch-action:manipulation;">✓ DONE</button>
+  `;
+  document.body.appendChild(toolbar);
+
+  // Toggle button (always visible, small)
+  const toggleBtn = document.createElement('button');
+  toggleBtn.textContent = '✏️ PATH';
+  toggleBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:10001;font:bold 11px monospace;padding:10px 14px;background:#222;color:#ff0;border:2px solid #ff0;border-radius:8px;touch-action:manipulation;opacity:0.7;';
+  document.body.appendChild(toggleBtn);
+
+  // Output display
   const drawLabel = document.createElement('div');
-  drawLabel.style.cssText = 'position:fixed;top:50px;right:16px;z-index:9999;font-family:monospace;font-size:12px;color:#ff0;background:rgba(0,0,0,0.85);padding:8px 12px;border-radius:6px;border:1px solid #ff0;display:none;line-height:1.6;white-space:pre;pointer-events:none;';
+  drawLabel.style.cssText = 'position:fixed;top:120px;left:8px;right:8px;z-index:10001;font-family:monospace;font-size:10px;color:#0f0;background:rgba(0,0,0,0.92);padding:12px;border-radius:8px;border:1px solid #0f0;display:none;line-height:1.5;white-space:pre-wrap;word-break:break-all;max-height:40vh;overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:auto;';
   document.body.appendChild(drawLabel);
 
   function resizeDrawCanvas() {
@@ -3528,8 +3548,8 @@ window.addEventListener('resize', setVH);
     drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
     if (drawPoints.length === 0) return;
 
-    // Draw lines between points
-    drawCtx.strokeStyle = '#ff0';
+    // Draw smooth curve through points
+    drawCtx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
     drawCtx.lineWidth = 3;
     drawCtx.lineJoin = 'round';
     drawCtx.setLineDash([8, 4]);
@@ -3543,31 +3563,36 @@ window.addEventListener('resize', setVH);
     drawCtx.stroke();
     drawCtx.setLineDash([]);
 
-    // Draw dots at each point
+    // Draw draggable dots at each point (larger for touch)
     drawPoints.forEach((p, i) => {
       const px = (p.x / 100) * drawCanvas.width;
       const py = (p.y / 100) * drawCanvas.height;
+      // Outer ring (touch target)
+      drawCtx.strokeStyle = '#fff';
+      drawCtx.lineWidth = 2;
+      drawCtx.beginPath();
+      drawCtx.arc(px, py, 18, 0, Math.PI * 2);
+      drawCtx.stroke();
+      // Inner dot
       drawCtx.fillStyle = i === 0 ? '#0f0' : (i === drawPoints.length - 1 ? '#f00' : '#ff0');
       drawCtx.beginPath();
-      drawCtx.arc(px, py, 6, 0, Math.PI * 2);
+      drawCtx.arc(px, py, 8, 0, Math.PI * 2);
       drawCtx.fill();
       // Label
       drawCtx.fillStyle = '#fff';
-      drawCtx.font = '10px monospace';
-      drawCtx.fillText(i + ': ' + p.x.toFixed(1) + ',' + p.y.toFixed(1), px + 10, py - 6);
+      drawCtx.font = 'bold 11px monospace';
+      drawCtx.fillText(i, px + 14, py - 14);
     });
   }
 
   function generateSVGPath() {
     if (drawPoints.length < 2) return 'Need at least 2 points';
-    // Convert % to SVG coords (viewBox 0 0 1000 1000)
+    // Convert viewport % to SVG coords (1000x1000 space)
     const svgPts = drawPoints.map(p => ({ x: p.x * 10, y: p.y * 10 }));
-    // Build a smooth cubic bezier path through the points
     let d = 'M ' + svgPts[0].x.toFixed(0) + ',' + svgPts[0].y.toFixed(0);
     for (let i = 1; i < svgPts.length; i++) {
       const prev = svgPts[i - 1];
       const curr = svgPts[i];
-      // Simple smooth curve using S command
       const cx = (prev.x + curr.x) / 2;
       const cy = prev.y + (curr.y - prev.y) * 0.5;
       if (i === 1) {
@@ -3582,41 +3607,132 @@ window.addEventListener('resize', setVH);
     return d;
   }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'd' || e.key === 'D') {
-      drawMode = !drawMode;
-      drawCanvas.style.pointerEvents = drawMode ? 'auto' : 'none';
-      drawCanvas.style.cursor = drawMode ? 'crosshair' : '';
-      drawLabel.style.display = drawMode ? 'block' : 'none';
-      drawLabel.textContent = 'DRAW MODE ON\nClick to add points\nC = copy SVG path\nZ = undo last\nX = clear all\nD = toggle off\n\nPoints: ' + drawPoints.length;
-    }
-    if (e.key === 'x' || e.key === 'X') {
-      drawPoints = [];
-      redrawPath();
-      drawLabel.textContent = 'DRAW MODE ON\nCleared!\nPoints: 0';
-    }
-    if (e.key === 'z' || e.key === 'Z') {
-      drawPoints.pop();
-      redrawPath();
-      drawLabel.textContent = 'DRAW MODE ON\nUndo! Points: ' + drawPoints.length;
-    }
-    if (e.key === 'c' || e.key === 'C') {
-      const path = generateSVGPath();
-      navigator.clipboard.writeText(path).then(() => {
-        drawLabel.textContent = 'COPIED TO CLIPBOARD!\n\n' + path + '\n\nPoints (' + drawPoints.length + '):\n' + drawPoints.map((p,i) => i + ': x=' + p.x.toFixed(1) + '% y=' + p.y.toFixed(1) + '%').join('\n');
-      }).catch(() => {
-        drawLabel.textContent = 'PATH (copy manually):\n\n' + path + '\n\nPoints (' + drawPoints.length + '):\n' + drawPoints.map((p,i) => i + ': x=' + p.x.toFixed(1) + '% y=' + p.y.toFixed(1) + '%').join('\n');
-      });
-    }
+  function findNearestPoint(tx, ty) {
+    let best = -1, bestDist = 30; // 30px touch radius
+    drawPoints.forEach((p, i) => {
+      const px = (p.x / 100) * drawCanvas.width;
+      const py = (p.y / 100) * drawCanvas.height;
+      const dist = Math.hypot(tx - px, ty - py);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
+
+  function enterDrawMode() {
+    drawMode = true;
+    drawCanvas.style.pointerEvents = 'auto';
+    toolbar.style.display = 'flex';
+    toggleBtn.style.display = 'none';
+    drawLabel.style.display = 'block';
+    drawLabel.textContent = 'TAP to place points along the path.\nDRAG existing points to adjust.\nPoints: ' + drawPoints.length;
+    // Scroll to timeline section
+    const tlFrac = 0.87;
+    const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo(0, tlFrac * scrollH);
+    redrawPath();
+  }
+
+  function exitDrawMode() {
+    drawMode = false;
+    drawCanvas.style.pointerEvents = 'none';
+    toolbar.style.display = 'none';
+    toggleBtn.style.display = 'block';
+    drawLabel.style.display = 'none';
+    redrawPath();
+  }
+
+  // Toggle
+  toggleBtn.addEventListener('click', (e) => { e.stopPropagation(); enterDrawMode(); });
+  document.getElementById('dbg-done').addEventListener('click', (e) => { e.stopPropagation(); exitDrawMode(); });
+
+  // Undo
+  document.getElementById('dbg-undo').addEventListener('click', (e) => {
+    e.stopPropagation();
+    drawPoints.pop();
+    redrawPath();
+    drawLabel.textContent = 'Undo! Points: ' + drawPoints.length;
   });
 
+  // Clear
+  document.getElementById('dbg-clear').addEventListener('click', (e) => {
+    e.stopPropagation();
+    drawPoints = [];
+    redrawPath();
+    drawLabel.textContent = 'Cleared! Tap to start fresh.';
+  });
+
+  // Copy path
+  document.getElementById('dbg-copy').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const path = generateSVGPath();
+    const info = 'Screen: ' + window.innerWidth + 'x' + window.innerHeight + '\n\n' + path;
+    navigator.clipboard.writeText(path).then(() => {
+      drawLabel.textContent = '✓ COPIED!\n\n' + info;
+    }).catch(() => {
+      // Clipboard API may fail on mobile — show for manual copy
+      drawLabel.textContent = 'SELECT & COPY:\n\n' + info;
+      // Also create a temporary textarea for easy copying
+      const ta = document.createElement('textarea');
+      ta.value = path;
+      ta.style.cssText = 'position:fixed;top:50%;left:10%;width:80%;z-index:10002;font:12px monospace;padding:12px;background:#111;color:#0f0;border:2px solid #0f0;border-radius:8px;height:80px;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      setTimeout(() => ta.remove(), 15000); // auto-remove after 15s
+    });
+  });
+
+  // Touch handling: tap to add, drag to move
+  drawCanvas.addEventListener('touchstart', (e) => {
+    if (!drawMode) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    dragIdx = findNearestPoint(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  drawCanvas.addEventListener('touchmove', (e) => {
+    if (!drawMode || dragIdx < 0) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    drawPoints[dragIdx].x = (touch.clientX / window.innerWidth) * 100;
+    drawPoints[dragIdx].y = (touch.clientY / window.innerHeight) * 100;
+    redrawPath();
+  }, { passive: false });
+
+  drawCanvas.addEventListener('touchend', (e) => {
+    if (!drawMode) return;
+    e.preventDefault();
+    if (dragIdx >= 0) {
+      // Was dragging — just release
+      drawLabel.textContent = 'Moved point ' + dragIdx + '.\nPoints: ' + drawPoints.length;
+      dragIdx = -1;
+      return;
+    }
+    // Tap to add new point
+    const touch = e.changedTouches[0];
+    const xPct = (touch.clientX / window.innerWidth) * 100;
+    const yPct = (touch.clientY / window.innerHeight) * 100;
+    drawPoints.push({ x: xPct, y: yPct });
+    redrawPath();
+    drawLabel.textContent = 'Point ' + (drawPoints.length - 1) + ' added at ' + xPct.toFixed(1) + '%, ' + yPct.toFixed(1) + '%\nPoints: ' + drawPoints.length;
+  }, { passive: false });
+
+  // Desktop: keyboard shortcuts still work
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'd' || e.key === 'D') { drawMode ? exitDrawMode() : enterDrawMode(); }
+    if (drawMode && (e.key === 'x' || e.key === 'X')) { drawPoints = []; redrawPath(); }
+    if (drawMode && (e.key === 'z' || e.key === 'Z')) { drawPoints.pop(); redrawPath(); }
+    if (drawMode && (e.key === 'c' || e.key === 'C')) { document.getElementById('dbg-copy').click(); }
+  });
+
+  // Desktop click still works
   drawCanvas.addEventListener('click', (e) => {
     if (!drawMode) return;
     const xPct = (e.clientX / window.innerWidth) * 100;
     const yPct = (e.clientY / window.innerHeight) * 100;
     drawPoints.push({ x: xPct, y: yPct });
     redrawPath();
-    drawLabel.textContent = 'DRAW MODE ON\nClick to add points\nC = copy SVG path\nZ = undo last\nX = clear all\nD = toggle off\n\nPoints: ' + drawPoints.length + '\nLast: ' + xPct.toFixed(1) + '%, ' + yPct.toFixed(1) + '%';
+    drawLabel.textContent = 'Point added. Points: ' + drawPoints.length;
   });
 })();
 </script>
