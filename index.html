@@ -1,0 +1,3625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Summit 2026 | BITS Pilani — Where Ideas Meet Execution</title>
+  <meta name="description" content="Apogee X E-Summit 2026 at BITS Pilani. Where ideas meet execution. Where Founders meet the Future. Workshops, Competitions, Networking & Experiences." />
+  <meta name="keywords" content="E-Summit BITS Pilani 2026, startup summit India, college entrepreneurship event, PIEDS" />
+  <meta property="og:title" content="E-Summit 2026 | BITS Pilani" />
+  <meta property="og:description" content="Where ideas meet execution. Where Founders meet the Future." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Anime.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+<style>
+/* ========================================
+   1: Reset & CSS Variables
+   ======================================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #000000;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --text-primary: #FFFFFF;
+  --text-muted: #A0A0A0;
+  --accent-blue: #1A5BC4;
+  --accent-blue-light: #4A90D9;
+  --accent-orange: #E87A20;
+  --accent-yellow: #F5C842;
+  --accent-red: #C43030;
+  --pixel-purple: #6B3FA0;
+  --gold: #FFD700;
+  --emerald: #2ECC71;
+  --ruby: #E74C3C;
+  --sapphire: #3498DB;
+  --amber: #F39C12;
+  --amethyst: #9B59B6;
+
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+::selection {
+  background-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   2: Base Layout
+   ======================================== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#scroll-container {
+  height: 900vh;
+  position: relative;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent-blue); }
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid var(--accent-yellow);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   3: Loading Screen
+   ======================================== */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+#loading-screen .logo {
+  width: clamp(200px, 40vw, 400px);
+  image-rendering: pixelated;
+}
+
+.loading-bar-container {
+  width: clamp(200px, 50vw, 400px);
+  height: 20px;
+  border: 2px solid var(--accent-yellow);
+  padding: 2px;
+  position: relative;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-yellow);
+  transition: width 0.3s ease;
+  image-rendering: pixelated;
+  /* Pixel block pattern */
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--accent-yellow) 0px,
+    var(--accent-yellow) 14px,
+    var(--bg-primary) 14px,
+    var(--bg-primary) 16px
+  );
+}
+
+.loading-text {
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.5vw, 12px);
+  color: var(--accent-yellow);
+  animation: blink-text 1s steps(1) infinite;
+}
+
+@keyframes blink-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ========================================
+   4: HUD
+   ======================================== */
+#hud {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#hud.visible {
+  opacity: 1;
+}
+
+/* Top-right: logo + countdown */
+.hud-top-right {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.hud-logo {
+  height: 52px;
+  image-rendering: pixelated;
+}
+
+.hud-countdown {
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  color: var(--gold);
+  text-align: right;
+  line-height: 1.8;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  background: rgba(10, 8, 20, 0.6);
+  padding: 8px 12px;
+  border-left: 2px solid var(--gold);
+}
+
+/* Top-left: scroll indicator */
+.hud-scroll-hint {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-muted);
+  pointer-events: none;
+  animation: bob 2s ease-in-out infinite;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* Bottom-right: nav buttons */
+.hud-nav {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  align-items: flex-end;
+}
+
+.hud-nav-btn {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  background: rgba(10, 8, 20, 0.85);
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  padding: 10px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  border-radius: 0;
+  min-width: 160px;
+  text-align: left;
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.hud-nav-btn:hover {
+  border-color: var(--gold);
+  background: rgba(255, 215, 0, 0.12);
+}
+
+.hud-nav-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(255, 215, 0, 0.08);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* ========================================
+   5: BP0 Title Screen
+   ======================================== */
+#bp0-title {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+#bp0-title.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Orange ticker */
+.ticker-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: var(--accent-orange);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-text {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--bg-primary);
+  white-space: nowrap;
+  animation: ticker-scroll 20s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-200%); }
+}
+
+/* Main logo */
+.title-logo {
+  width: clamp(250px, 50vw, 550px);
+  image-rendering: pixelated;
+  animation: logo-pulse 2s ease-in-out infinite;
+}
+
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Press Start */
+.press-start {
+  font-family: var(--font-pixel);
+  font-size: clamp(10px, 2vw, 16px);
+  color: var(--text-primary);
+  margin-top: 40px;
+  animation: blink-text 1s steps(1) infinite;
+  cursor: pointer;
+}
+
+/* RPG Menu */
+.rpg-menu {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.rpg-menu-item {
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.5vw, 12px);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+}
+
+.rpg-menu-item:hover, .rpg-menu-item.selected {
+  color: var(--text-primary);
+}
+
+.rpg-arrow {
+  color: var(--accent-yellow);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  font-size: 1em;
+}
+
+.rpg-menu-item.selected .rpg-arrow,
+.rpg-menu-item:hover .rpg-arrow {
+  opacity: 1;
+}
+
+/* Tagline */
+.title-tagline {
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 1.2vw, 10px);
+  color: var(--text-muted);
+  margin-top: 24px;
+  text-align: center;
+  max-width: 500px;
+  line-height: 1.8;
+}
+
+/* Mascots */
+.mascot-row {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  gap: clamp(4px, 1vw, 12px);
+  align-items: flex-end;
+}
+
+.mascot {
+  width: clamp(28px, 5vw, 48px);
+  height: clamp(28px, 5vw, 48px);
+  border-radius: 4px;
+  animation: mascot-float 2s ease-in-out infinite;
+}
+
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Footer text */
+.title-footer {
+  position: absolute;
+  bottom: 12px;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ========================================
+   6: BP0.5 Clock Tower — Countdown Display
+   ======================================== */
+
+/* Day counter pill — below clock face */
+/* Clock pill & banner removed */
+
+/* ========================================
+   7: BP1 NPC Dialogue — Cinematic JRPG Style
+   ======================================== */
+
+/* Blur overlay behind NPC section */
+#bp1-blur-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(10,8,25,0.0) 40%, rgba(10,8,25,0.6) 100%),
+    rgba(10, 8, 25, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#bp1-blur-overlay.visible {
+  opacity: 1;
+}
+
+#bp1-section {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#bp1-section.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* NPC — Rogue Character */
+.npc-wrapper {
+  position: fixed;
+  z-index: 3;
+  opacity: 0;
+  width: clamp(220px, 28vw, 380px);
+  top: 2vh;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 60px rgba(0, 0, 0, 0.5));
+  transition: width 0.6s ease, top 0.6s ease, left 0.6s ease, bottom 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+}
+
+.npc-wrapper .rogue-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Companion mode — bottom-left character after BP1, touching bottom edge */
+.npc-wrapper.companion {
+  width: clamp(120px, 12vw, 180px);
+  top: auto;
+  bottom: 0;
+  left: 2vw;
+  right: auto;
+  transform: translateX(0);
+  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.7));
+}
+
+/* Idle floating animation */
+@keyframes idle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+.npc-wrapper.idle {
+  animation: idle-float 3s ease-in-out infinite;
+}
+
+/* Cyan particle flicker */
+@keyframes particle-flicker {
+  0%, 100% { opacity: 0.8; transform: translateY(0) scale(1); }
+  30% { opacity: 1; transform: translateY(-4px) scale(1.1); }
+  60% { opacity: 0.4; transform: translateY(-8px) scale(0.7); }
+  90% { opacity: 0; transform: translateY(-14px) scale(0.3); }
+}
+@keyframes particle-flicker2 {
+  0%, 100% { opacity: 0.6; transform: translateY(0) scale(0.8); }
+  25% { opacity: 1; transform: translateY(-6px) scale(1.2); }
+  50% { opacity: 0.5; transform: translateY(-12px) scale(0.6); }
+  80% { opacity: 0; transform: translateY(-18px) scale(0.2); }
+}
+
+.rogue-particle { animation: particle-flicker 1.8s ease-out infinite; }
+.rogue-particle-d1 { animation-delay: 0s; }
+.rogue-particle-d2 { animation-delay: 0.3s; }
+.rogue-particle-d3 { animation-delay: 0.6s; }
+.rogue-particle-d4 { animation-delay: 0.9s; }
+.rogue-particle-d5 { animation-delay: 1.2s; }
+.rogue-particle-d6 { animation-delay: 0.15s; }
+.rogue-particle-d7 { animation-delay: 0.45s; }
+.rogue-particle-d8 { animation-delay: 0.75s; }
+.rogue-particle-alt { animation: particle-flicker2 2.2s ease-out infinite; }
+.rogue-particle-alt.rogue-particle-d1 { animation-delay: 0.2s; }
+.rogue-particle-alt.rogue-particle-d2 { animation-delay: 0.5s; }
+.rogue-particle-alt.rogue-particle-d3 { animation-delay: 0.8s; }
+.rogue-particle-alt.rogue-particle-d4 { animation-delay: 1.1s; }
+
+/* Eye glow pulse */
+@keyframes eye-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px #00e8ff) drop-shadow(0 0 12px #00c8e0); }
+  50% { filter: drop-shadow(0 0 10px #00f0ff) drop-shadow(0 0 20px #00d8f0) drop-shadow(0 0 30px rgba(0,232,255,0.3)); }
+}
+.rogue-eyes-group { animation: eye-pulse 2.5s ease-in-out infinite; }
+
+/* Cape sway */
+@keyframes cape-sway {
+  0%, 100% { transform: skewX(0deg); }
+  50% { transform: skewX(1.5deg); }
+}
+.rogue-cape-sway {
+  transform-origin: top center;
+  animation: cape-sway 4s ease-in-out infinite;
+}
+
+/* Dialog box — full width, cinematic JRPG style */
+.dialog-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 38vh;
+  min-height: 240px;
+  z-index: 5;
+  background: rgba(8, 6, 20, 0.96);
+  border-top: 4px solid var(--gold);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow:
+    0 -8px 0 0 rgba(255, 215, 0, 0.15),
+    inset 0 2px 0 0 rgba(255, 215, 0, 0.3);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: none;
+}
+
+.dialog-box.visible {
+  transform: translateY(0);
+}
+
+/* Scanline texture inside dialog */
+.dialog-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Corner decorations */
+.dialog-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--gold);
+  z-index: 1;
+}
+
+.dialog-corner--top-left { top: -4px; left: 0; }
+.dialog-corner--top-right { top: -4px; right: 0; }
+
+/* Text panel */
+.dialog-text-panel {
+  flex: 1;
+  padding: 28px 40px 24px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.dialog-slide-counter {
+  position: absolute;
+  top: 16px;
+  right: 28px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: rgba(255, 215, 0, 0.5);
+  letter-spacing: 1px;
+}
+
+.dialog-text {
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  color: #f0f0f0;
+  line-height: 2.2;
+  letter-spacing: 1px;
+  max-width: 85%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.dialog-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+
+.dialog-nav-btn {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--gold);
+  background: transparent;
+  border: 2px solid var(--gold);
+  padding: 10px 20px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  border-radius: 0;
+  pointer-events: auto;
+  transition: background 0.15s, opacity 0.2s;
+}
+
+.dialog-nav-btn:hover {
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.dialog-nav-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dialog-nav-btn--prev {
+  border-color: rgba(255, 215, 0, 0.4);
+  color: rgba(255, 215, 0, 0.6);
+}
+
+.dialog-nav-btn--prev:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(255, 215, 0, 0.1);
+}
+
+/* Border flash on slide advance */
+@keyframes dialog-flash {
+  0% { border-top-color: #ffffff; }
+  100% { border-top-color: var(--gold); }
+}
+
+.dialog-box.flash {
+  animation: dialog-flash 0.08s steps(1) 1;
+}
+
+/* ========================================
+   8: BP2 Radial HUD — Scroll-Driven Event Showcase
+   ======================================== */
+#bp2-section {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 30px;
+  overflow: hidden;
+}
+
+#bp2-section.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Left sidebar removed — quest card modal handles event details */
+
+/* --- Radial HUD container (Bronze Medallion) --- */
+.bp2-hud-container {
+  position: relative;
+  width: clamp(320px, 42vw, 560px);
+  height: clamp(320px, 42vw, 560px);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.bp2-hud-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Hover glow on medallion */
+.bp2-hud-container:hover .bp2-glow-ring {
+  opacity: 0.5;
+  transition: opacity 0.4s;
+}
+.bp2-glow-ring {
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+/* --- Inner animation canvas (dark center of medallion) --- */
+.bp2-inner-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.bp2-anim-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  padding: 20px;
+  text-align: center;
+}
+
+.bp2-anim-layer.active {
+  opacity: 1;
+}
+
+/* Event display inside medallion */
+.bp2-event-icon {
+  font-size: clamp(48px, 6vw, 88px);
+  margin-bottom: 12px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.7));
+}
+
+.bp2-event-inner-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(11px, 1.6vw, 17px);
+  font-weight: 700;
+  color: #e4dcd0;
+  letter-spacing: 4px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  text-shadow:
+    0 0 12px rgba(180, 150, 100, 0.25),
+    0 2px 6px rgba(0,0,0,0.9);
+}
+
+.bp2-event-inner-subtitle {
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 1vw, 9px);
+  font-weight: 500;
+  color: #c4beb4;
+  letter-spacing: 2px;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  background: linear-gradient(180deg, #8a8a92 0%, #6a6a72 20%, #4a4a52 50%, #5a5a62 80%, #6a6a72 100%);
+  padding: 7px 28px;
+  border-radius: 2px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(0,0,0,0.4);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* --- Progress bar at bottom --- */
+.bp2-progress-bar {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  z-index: 10;
+  display: flex;
+  gap: 2px;
+}
+
+.bp2-progress-segment {
+  flex: 1;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bp2-progress-segment .bp2-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.bp2-progress-segment:nth-child(1) .bp2-fill { background: var(--gold); }
+.bp2-progress-segment:nth-child(2) .bp2-fill { background: #ff4444; }
+.bp2-progress-segment:nth-child(3) .bp2-fill { background: #3366ff; }
+.bp2-progress-segment:nth-child(4) .bp2-fill { background: #33cc66; }
+.bp2-progress-segment:nth-child(5) .bp2-fill { background: #ffaa00; }
+
+/* Explore More button inside medallion */
+.bp2-explore-btn {
+  font-family: var(--font-pixel);
+  font-size: clamp(7px, 0.9vw, 9px);
+  color: #e4dcd0;
+  background: linear-gradient(180deg, #5a4230 0%, #3a2818 50%, #4a3828 100%);
+  border: 2px solid #8a6830;
+  padding: 8px 18px;
+  margin-top: 12px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  border-radius: 2px;
+  pointer-events: auto;
+  transition: background 0.2s, border-color 0.2s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.bp2-explore-btn:hover {
+  background: linear-gradient(180deg, #6a5238 0%, #4a3828 50%, #5a4430 100%);
+  border-color: #c0a050;
+  color: #fff;
+}
+
+/* ===== Quest Card Modal ===== */
+.quest-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.quest-modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quest-card {
+  position: relative;
+  width: clamp(340px, 42vw, 460px);
+  cursor: default;
+}
+
+.quest-frame-svg {
+  position: absolute;
+  inset: -18px;
+  width: calc(100% + 36px);
+  height: calc(100% + 36px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.quest-parchment {
+  position: relative;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(180, 140, 80, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(160, 120, 60, 0.12) 0%, transparent 50%),
+    linear-gradient(175deg, #e8d8b4 0%, #dcc8a0 15%, #e2d0a8 30%, #d8c498 50%, #decda8 70%, #e0d0a4 85%, #d4c094 100%);
+  border-radius: 4px;
+  padding: 32px 30px 28px;
+  box-shadow: inset 0 0 30px rgba(120, 90, 40, 0.15), 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.quest-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(16px, 2vw, 22px);
+  color: #2a2218;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 0 rgba(255,240,200,0.5);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.quest-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 14px;
+  opacity: 0.5;
+}
+.quest-divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #8a7448, transparent); }
+.quest-divider-diamond { width: 8px; height: 8px; background: #8a7448; transform: rotate(45deg); flex-shrink: 0; }
+.quest-divider-dot { width: 4px; height: 4px; background: #8a7448; border-radius: 50%; flex-shrink: 0; }
+
+.quest-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: #3a3228;
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+.quest-stats-divider { height: 1px; background: linear-gradient(90deg, #a08858, #c0a870, #a08858); opacity: 0.35; margin-bottom: 16px; }
+
+.quest-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: #3a2e20;
+}
+.quest-stat-bullet { width: 6px; height: 6px; background: #6a5838; border-radius: 1px; transform: rotate(45deg); flex-shrink: 0; }
+.quest-stat-value { color: #2a2010; }
+
+.quest-stars { display: inline-flex; gap: 2px; vertical-align: middle; margin-left: 4px; }
+.quest-star { width: 16px; height: 16px; }
+
+.quest-close-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4a3828;
+  border: 2px solid #8a6830;
+  color: #e4dcd0;
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+}
+.quest-close-btn:hover { background: #5a4230; border-color: #c0a050; }
+
+/* Event Card Modal — RPG style matching BP1 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.event-card {
+  background: rgba(8, 6, 20, 0.96);
+  border: 3px solid var(--gold);
+  border-radius: 0;
+  padding: 32px 36px;
+  max-width: 640px;
+  width: 92vw;
+  position: relative;
+  transform: translateY(80px);
+  opacity: 0;
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.15),
+    inset 0 1px 0 0 rgba(255, 215, 0, 0.2);
+}
+
+/* Scanline texture in card */
+.event-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  pointer-events: none;
+}
+
+/* Card corner decorations */
+.event-card::after {
+  content: '';
+  position: absolute;
+  top: -3px; left: -3px;
+  width: 12px; height: 12px;
+  background: var(--gold);
+}
+
+.event-card-corner-tr {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 12px; height: 12px;
+  background: var(--gold);
+}
+
+.modal-overlay.open .event-card {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.event-card-category {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  line-height: 2;
+}
+
+.event-card-name {
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  color: var(--gold);
+  margin-bottom: 20px;
+  line-height: 2;
+  letter-spacing: 1px;
+}
+
+.event-card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.event-card-meta-item {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-muted);
+  line-height: 2;
+  letter-spacing: 1px;
+}
+
+.event-card-meta-item span {
+  display: block;
+  color: var(--text-primary);
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+.event-card-desc {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 2;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.event-card-difficulty {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  margin-bottom: 24px;
+  line-height: 2;
+  letter-spacing: 1px;
+}
+
+.event-card-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-register {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: var(--accent-orange);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+
+.btn-register:hover { background: #d06a10; }
+
+.btn-close {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  background: none;
+  border: 2px solid var(--text-muted);
+  color: var(--text-muted);
+  padding: 12px 24px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ========================================
+   9: Timeline — Winding Path with Event Pins
+   ======================================== */
+#timeline-section {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  overflow: hidden;
+}
+
+#timeline-section.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Subtle vignette overlay — no blur, video last frame shows through */
+.timeline-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center top, rgba(0,0,0,0.15) 20%, rgba(0,0,0,0.45) 100%);
+  pointer-events: none;
+}
+
+/* SVG winding path */
+#timeline-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.timeline-path-bg {
+  fill: none;
+  stroke: rgba(255, 215, 0, 0.12);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.timeline-path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+}
+
+.timeline-dot {
+  fill: var(--gold);
+  filter: drop-shadow(0 0 8px var(--gold));
+}
+
+/* Event pins along the path */
+.tl-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.tl-pin.revealed {
+  opacity: 1;
+}
+
+.tl-pin:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.tl-pin.tba {
+  filter: grayscale(0.8);
+  opacity: 0.4 !important;
+  cursor: default;
+}
+
+.tl-pin-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.8)) drop-shadow(0 0 16px rgba(0,0,0,0.5));
+}
+
+.tl-pin-name {
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 11px);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+
+.tl-pin-date {
+  font-family: var(--font-pixel);
+  font-size: clamp(6px, 0.9vw, 8px);
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8);
+  margin-top: 2px;
+}
+
+/* Side info card when pin is clicked */
+.tl-card {
+  position: absolute;
+  z-index: 5;
+  background: rgba(8, 6, 20, 0.96);
+  border: 2px solid var(--gold);
+  padding: 20px 24px;
+  width: min(300px, 85vw);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 215, 0, 0.2);
+}
+
+.tl-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+  pointer-events: none;
+}
+
+.tl-card.open {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tl-card-name {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 10px;
+  line-height: 2;
+  letter-spacing: 1px;
+}
+
+.tl-card-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #ccc;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.tl-card-meta {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  line-height: 2;
+  margin-bottom: 14px;
+}
+
+.tl-card-close {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  background: none;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 6px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+
+.tl-card-close:hover {
+  background: rgba(255, 215, 0, 0.15);
+}
+
+/* Left date indicator */
+.tl-date-indicator {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  line-height: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.tl-date-indicator.visible {
+  opacity: 1;
+}
+
+/* ========================================
+   11: CRT Effects
+   ======================================== */
+#crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 1px,
+    rgba(0, 0, 0, 0.3) 1px,
+    rgba(0, 0, 0, 0.3) 2px
+  );
+  background-size: 100% 4px;
+  opacity: 0.5;
+}
+
+.crt-rgb-grid {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03) 0px,
+    rgba(0, 255, 0, 0.03) 1px,
+    rgba(0, 0, 255, 0.03) 2px,
+    transparent 3px
+  );
+  background-size: 3px 100%;
+  opacity: 0.6;
+}
+
+.crt-moving-line {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 48%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 52%,
+    transparent 100%
+  );
+  background-size: 100% 20%;
+  animation: crt-scan-move 6s linear infinite;
+}
+
+@keyframes crt-scan-move {
+  0% { background-position: 0% -20%; }
+  100% { background-position: 0% 120%; }
+}
+
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.35) 80%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+.crt-flicker {
+  position: absolute;
+  inset: 0;
+  animation: crt-flicker-anim 0.15s infinite;
+  opacity: 0;
+}
+
+@keyframes crt-flicker-anim {
+  0% { opacity: 0; }
+  5% { opacity: 0.02; background: white; }
+  10% { opacity: 0; }
+  15% { opacity: 0.01; background: white; }
+  20% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+#crt-noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.04;
+  image-rendering: pixelated;
+}
+
+/* ========================================
+   12: Keyframes (additional)
+   ======================================== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pin-drop {
+  0% { opacity: 0; transform: translate(-50%, -200%); }
+  60% { transform: translate(-50%, -90%); }
+  80% { transform: translate(-50%, -105%); }
+  100% { opacity: 1; transform: translate(-50%, -100%); }
+}
+
+/* ========================================
+   13: Responsive
+   ======================================== */
+@media (max-width: 768px) {
+  .hud-countdown { font-size: 10px; padding: 6px 10px; }
+  .hud-logo { height: 36px; }
+  .hud-nav-btn { font-size: 8px; padding: 8px 12px; min-width: 130px; }
+  .hud-scroll-hint { font-size: 8px; }
+
+  /* BP1 dialog */
+  .dialog-text { font-size: 12px; max-width: 95%; }
+  .dialog-text-panel { padding: 20px 24px 20px 20px; }
+  .dialog-nav-btn { font-size: 9px; padding: 8px 14px; }
+  .npc-wrapper { width: clamp(180px, 24vw, 280px); }
+  .npc-wrapper.companion { width: clamp(100px, 14vw, 140px); top: auto; bottom: 0; left: 2vw; right: auto; transform: translateX(0); }
+
+  /* BP2 radial HUD */
+  .bp2-hud-container { width: 85vw; height: 85vw; }
+  .bp2-progress-bar { width: 200px; }
+
+  .tl-card {
+    width: 90vw;
+    left: 5vw !important;
+    right: auto !important;
+    bottom: 10px !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  .tl-card.open { transform: none !important; }
+  .tl-pin-icon { font-size: 20px; }
+  .tl-pin-name { font-size: 7px; white-space: normal; max-width: 80px; line-height: 1.4; }
+  .tl-pin-date { font-size: 6px; }
+  .tl-date-indicator { display: none; }
+
+  /* Timeline SVG: fill viewport on mobile */
+  #timeline-svg { width: 100%; height: 100%; }
+
+  .event-card { padding: 20px 24px; }
+  .event-card-meta { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .hud-countdown { font-size: 8px; }
+  .hud-logo { height: 28px; }
+  .hud-nav { bottom: 12px; right: 8px; }
+  .hud-nav-btn { font-size: 7px; padding: 8px 10px; min-height: 44px; min-width: 44px; }
+
+  /* BP1 dialog mobile */
+  .dialog-box { height: 42vh; }
+  .dialog-text { font-size: 11px; }
+  .dialog-text-panel { padding: 16px 20px; }
+  .dialog-nav-btn { font-size: 8px; padding: 7px 12px; }
+  .npc-wrapper { width: clamp(160px, 40vw, 220px); }
+  .npc-wrapper.companion { width: clamp(80px, 18vw, 110px); top: auto; bottom: 0; left: 2vw; right: auto; transform: translateX(0); }
+  .quest-card { width: 90vw; }
+
+  /* BP2 */
+  .bp2-hud-container { width: 90vw; height: 90vw; }
+  .bp2-event-inner-title { font-size: 8px; letter-spacing: 2px; }
+  .bp2-event-inner-subtitle { font-size: 6px; padding: 5px 16px; }
+  .bp2-event-icon { font-size: 36px; }
+  .bp2-progress-bar { width: 160px; }
+  .tl-pin-name { font-size: 6px; max-width: 70px; }
+  .tl-pin-icon { font-size: 18px; }
+  .tl-pin-date { font-size: 5px; }
+}
+
+/* ========================================
+   14: Reduced Motion
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html { scroll-behavior: auto; }
+
+  .crt-moving-line,
+  .crt-flicker,
+  #crt-noise { display: none; }
+
+  .ticker-text { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ Loading Screen ============ -->
+<div id="loading-screen">
+  <img src="public/images/logo/esummit-logo.png" alt="E-Summit 2026" class="logo" />
+  <div class="loading-bar-container">
+    <div class="loading-bar-fill" id="loading-bar"></div>
+  </div>
+  <div class="loading-text">LOADING WORLD...</div>
+</div>
+
+<!-- ============ Background Video ============ -->
+<video id="bg-video" muted playsinline preload="auto" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+  <source src="esummit_video_website.mp4" type="video/mp4" />
+</video>
+
+<!-- ============ CRT Overlay ============ -->
+<div id="crt-overlay" aria-hidden="true">
+  <div class="crt-scanlines"></div>
+  <div class="crt-rgb-grid"></div>
+  <div class="crt-moving-line"></div>
+  <div class="crt-vignette"></div>
+  <div class="crt-flicker"></div>
+  <canvas id="crt-noise"></canvas>
+</div>
+
+<!-- ============ HUD ============ -->
+<div id="hud">
+  <div class="hud-top-right">
+    <img src="public/images/logo/esummit-logo.png" alt="E-Summit 2026" class="hud-logo" />
+    <div class="hud-countdown" id="hud-countdown"></div>
+  </div>
+  <div class="hud-scroll-hint" id="scroll-hint">SCROLL TO EXPLORE ▼</div>
+  <nav class="hud-nav" aria-label="Section navigation">
+    <button class="hud-nav-btn" data-target="0.00">▶ START</button>
+    <button class="hud-nav-btn" data-target="0.17">🗼 TOWER</button>
+    <button class="hud-nav-btn" data-target="0.48">💎 ROTUNDA</button>
+    <button class="hud-nav-btn" data-target="0.85">🗺 TIMELINE</button>
+  </nav>
+</div>
+
+<!-- BP0 Title Screen removed — video starts immediately -->
+
+<!-- Clock pill & banner removed -->
+
+<!-- ============ BP1: Blur Overlay ============ -->
+<div id="bp1-blur-overlay"></div>
+
+<!-- ============ BP1: Rogue Character ============ -->
+<div class="npc-wrapper" id="npc">
+  <svg class="rogue-svg" viewBox="0 0 360 560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="rogueEyeGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff"/><stop offset="25%" stop-color="#b0f8ff"/>
+        <stop offset="50%" stop-color="#00e8ff"/><stop offset="80%" stop-color="#0090b0"/>
+        <stop offset="100%" stop-color="#004860" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="rogueEyeGlowOuter" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#00e8ff" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#00e8ff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="rogueHoodGrad" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#2a2848"/><stop offset="40%" stop-color="#1e1c38"/>
+        <stop offset="100%" stop-color="#161428"/>
+      </linearGradient>
+      <linearGradient id="rogueCapeGrad" x1="0" y1="0" x2="0.3" y2="1">
+        <stop offset="0%" stop-color="#2a2545"/><stop offset="50%" stop-color="#1c1835"/>
+        <stop offset="100%" stop-color="#141225"/>
+      </linearGradient>
+      <linearGradient id="rogueCapeLining" x1="0" y1="0" x2="0.5" y2="1">
+        <stop offset="0%" stop-color="#8a2028"/><stop offset="50%" stop-color="#6a1820"/>
+        <stop offset="100%" stop-color="#4a1018"/>
+      </linearGradient>
+      <linearGradient id="rogueArmorGrad" x1="0.3" y1="0" x2="0.7" y2="1">
+        <stop offset="0%" stop-color="#3a3050"/><stop offset="50%" stop-color="#2e2842"/>
+        <stop offset="100%" stop-color="#242038"/>
+      </linearGradient>
+      <linearGradient id="rogueLeatherGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#4a3848"/><stop offset="100%" stop-color="#3a2838"/>
+      </linearGradient>
+      <linearGradient id="rogueBootGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3a3048"/><stop offset="100%" stop-color="#2a2038"/>
+      </linearGradient>
+      <filter id="rogueParticleGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="2" result="blur"/>
+        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+      </filter>
+      <filter id="rogueBigGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="8" result="blur"/>
+        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+      </filter>
+      <filter id="rogueCharShadow">
+        <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+      </filter>
+    </defs>
+
+    <!-- Cape back -->
+    <g class="rogue-cape-sway">
+      <path d="M 240 160 Q 255 200, 270 260 Q 282 320, 290 380 Q 295 430, 285 480 Q 278 510, 268 525 L 258 530 Q 262 520, 260 490 Q 255 440, 248 380 Q 240 310, 238 240 Z" fill="url(#rogueCapeLining)" opacity="0.85"/>
+      <path d="M 120 160 Q 100 200, 85 260 Q 72 330, 68 400 Q 65 450, 72 500 Q 76 520, 84 535 Q 88 540, 95 538 Q 90 520, 88 490 Q 86 440, 92 380 Q 100 310, 112 240 Z" fill="url(#rogueCapeGrad)"/>
+      <path d="M 118 165 Q 105 210, 92 270 Q 82 330, 78 395 Q 76 440, 80 490 L 88 488 Q 86 440, 90 385 Q 98 320, 108 260 Q 115 210, 120 175 Z" fill="url(#rogueCapeLining)" opacity="0.6"/>
+      <path d="M 72 500 Q 68 515, 74 530 Q 78 538, 84 535 L 80 520 Z" fill="#1c1835" opacity="0.8"/>
+      <path d="M 285 480 Q 290 500, 282 520 Q 276 530, 268 525 L 275 505 Z" fill="#1c1835" opacity="0.8"/>
+      <path d="M 100 200 Q 95 260, 88 340" stroke="#3a3558" stroke-width="1.5" fill="none" opacity="0.5"/>
+      <path d="M 250 195 Q 260 260, 272 340" stroke="#8a2830" stroke-width="1.2" fill="none" opacity="0.4"/>
+    </g>
+
+    <!-- Body / Torso -->
+    <g filter="url(#rogueCharShadow)">
+      <path d="M 140 195 L 140 300 Q 140 340, 145 360 L 215 360 Q 220 340, 220 300 L 220 195 Q 200 185, 180 183 Q 160 185, 140 195 Z" fill="url(#rogueArmorGrad)"/>
+      <path d="M 158 200 L 158 350 L 202 350 L 202 200 Q 190 192, 180 190 Q 170 192, 158 200 Z" fill="url(#rogueLeatherGrad)" opacity="0.7"/>
+      <path d="M 155 210 Q 165 205, 180 203 Q 195 205, 205 210" stroke="#4a4060" stroke-width="1.5" fill="none" opacity="0.6"/>
+      <path d="M 150 230 Q 160 225, 180 223 Q 200 225, 210 230" stroke="#4a4060" stroke-width="1" fill="none" opacity="0.4"/>
+      <line x1="150" y1="280" x2="210" y2="280" stroke="#9898a8" stroke-width="1.5" opacity="0.5"/>
+      <path d="M 142 320 Q 160 328, 180 330 Q 200 328, 218 320" stroke="#9898a8" stroke-width="1.5" fill="none" opacity="0.5"/>
+      <rect x="174" y="208" width="12" height="10" rx="1" fill="#5a4828" stroke="#8a7840" stroke-width="1"/>
+      <rect x="177" y="210" width="6" height="6" rx="0.5" fill="#8a7840"/>
+      <circle cx="180" cy="213" r="1.5" fill="#c0a850"/>
+      <rect x="142" y="290" width="76" height="10" rx="2" fill="#4a3838"/>
+      <rect x="142" y="291" width="76" height="2" fill="#5a4848" opacity="0.5"/>
+      <circle cx="180" cy="295" r="10" fill="#6a6a78" stroke="#8a8a98" stroke-width="1.5"/>
+      <circle cx="180" cy="295" r="7" fill="#5a5a68"/>
+      <line x1="175" y1="290" x2="185" y2="300" stroke="#a0a0b0" stroke-width="2" stroke-linecap="round"/>
+      <line x1="185" y1="290" x2="175" y2="300" stroke="#a0a0b0" stroke-width="2" stroke-linecap="round"/>
+      <rect x="177" y="230" width="6" height="60" rx="1" fill="#4a3838"/>
+      <rect x="176" y="248" width="8" height="8" rx="1" fill="#5a5060" stroke="#7a7088" stroke-width="0.8"/>
+      <rect x="176" y="265" width="8" height="6" rx="1" fill="#5a5060" stroke="#7a7088" stroke-width="0.8"/>
+    </g>
+
+    <!-- Arms -->
+    <g>
+      <path d="M 140 198 Q 125 210, 118 240 Q 112 270, 115 300 Q 118 320, 122 340 L 135 340 Q 132 320, 130 300 Q 128 270, 132 240 Q 136 215, 142 205 Z" fill="url(#rogueArmorGrad)"/>
+      <path d="M 120 250 Q 125 240, 132 238 L 133 268 Q 126 270, 121 265 Z" fill="#3a3050" stroke="#4a4060" stroke-width="0.8" opacity="0.7"/>
+      <rect x="118" y="305" width="18" height="22" rx="3" fill="#3a2838" stroke="#4a3848" stroke-width="1"/>
+      <line x1="120" y1="310" x2="134" y2="310" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <line x1="120" y1="316" x2="134" y2="316" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <line x1="120" y1="322" x2="134" y2="322" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <rect x="122" y="312" width="5" height="4" rx="0.5" fill="#7a7088" opacity="0.8"/>
+    </g>
+    <g>
+      <path d="M 220 198 Q 235 210, 242 240 Q 248 270, 245 300 Q 242 320, 238 340 L 225 340 Q 228 320, 230 300 Q 232 270, 228 240 Q 224 215, 218 205 Z" fill="url(#rogueArmorGrad)"/>
+      <path d="M 240 250 Q 235 240, 228 238 L 227 268 Q 234 270, 239 265 Z" fill="#3a3050" stroke="#4a4060" stroke-width="0.8" opacity="0.7"/>
+      <rect x="224" y="305" width="18" height="22" rx="3" fill="#3a2838" stroke="#4a3848" stroke-width="1"/>
+      <line x1="226" y1="310" x2="240" y2="310" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <line x1="226" y1="316" x2="240" y2="316" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <line x1="226" y1="322" x2="240" y2="322" stroke="#5a4858" stroke-width="1" opacity="0.6"/>
+      <rect x="230" y="308" width="8" height="3" rx="0.5" fill="#8a8a98" opacity="0.5"/>
+    </g>
+
+    <!-- Hands -->
+    <g>
+      <path d="M 120 338 Q 115 345, 112 355 Q 110 362, 114 365 L 118 360 Q 116 352, 120 345 Z" fill="#1a1828"/>
+      <path d="M 126 340 Q 122 348, 120 358 Q 118 365, 122 367 L 125 362 Q 124 354, 126 346 Z" fill="#1a1828"/>
+      <path d="M 132 340 Q 130 350, 128 358 Q 127 364, 130 366 L 133 360 Q 132 352, 133 346 Z" fill="#1a1828"/>
+    </g>
+    <g>
+      <path d="M 240 338 Q 245 345, 248 355 Q 250 362, 246 365 L 242 360 Q 244 352, 240 345 Z" fill="#1a1828"/>
+      <path d="M 234 340 Q 238 348, 240 358 Q 242 365, 238 367 L 235 362 Q 236 354, 234 346 Z" fill="#1a1828"/>
+      <path d="M 228 340 Q 230 350, 232 358 Q 233 364, 230 366 L 227 360 Q 228 352, 227 346 Z" fill="#1a1828"/>
+    </g>
+
+    <!-- Lower body / skirt armor -->
+    <g>
+      <path d="M 138 355 L 132 420 Q 135 430, 145 432 L 155 430 L 155 358 Z" fill="#2e2842"/>
+      <path d="M 155 355 L 155 432 L 180 435 L 205 432 L 205 355 Z" fill="#282240"/>
+      <path d="M 205 355 L 205 430 L 215 432 Q 225 430, 228 420 L 222 355 Z" fill="#2e2842"/>
+      <path d="M 140 360 L 220 360" stroke="#8a8a98" stroke-width="1.5" opacity="0.45"/>
+      <path d="M 155 358 L 155 430" stroke="#3a3458" stroke-width="1" opacity="0.4"/>
+      <path d="M 205 358 L 205 430" stroke="#3a3458" stroke-width="1" opacity="0.4"/>
+      <circle cx="148" cy="400" r="1.5" fill="#5a5a68"/>
+      <circle cx="180" cy="405" r="1.5" fill="#5a5a68"/>
+      <circle cx="212" cy="400" r="1.5" fill="#5a5a68"/>
+    </g>
+
+    <!-- Legs -->
+    <g>
+      <rect x="148" y="428" width="24" height="50" rx="4" fill="#242038"/>
+      <rect x="145" y="428" width="30" height="14" rx="4" fill="#3a3050" stroke="#4a4060" stroke-width="0.8"/>
+      <rect x="150" y="431" width="20" height="3" rx="1" fill="#4a4060" opacity="0.5"/>
+      <rect x="152" y="436" width="16" height="2" rx="1" fill="#4a4060" opacity="0.4"/>
+    </g>
+    <g>
+      <rect x="188" y="428" width="24" height="50" rx="4" fill="#242038"/>
+      <rect x="185" y="428" width="30" height="14" rx="4" fill="#3a3050" stroke="#4a4060" stroke-width="0.8"/>
+      <rect x="190" y="431" width="20" height="3" rx="1" fill="#4a4060" opacity="0.5"/>
+      <rect x="192" y="436" width="16" height="2" rx="1" fill="#4a4060" opacity="0.4"/>
+    </g>
+
+    <!-- Boots -->
+    <g>
+      <path d="M 146 472 L 146 505 Q 146 515, 152 518 L 172 520 Q 178 518, 178 512 L 178 472 Z" fill="url(#rogueBootGrad)"/>
+      <rect x="144" y="468" width="36" height="10" rx="3" fill="#3a3048" stroke="#4a4060" stroke-width="0.8"/>
+      <line x1="148" y1="485" x2="176" y2="485" stroke="#4a3848" stroke-width="2"/>
+      <line x1="148" y1="495" x2="176" y2="495" stroke="#4a3848" stroke-width="2"/>
+      <rect x="155" y="483" width="6" height="5" rx="1" fill="#5a5a68" opacity="0.7"/>
+      <rect x="155" y="493" width="6" height="5" rx="1" fill="#5a5a68" opacity="0.7"/>
+      <rect x="145" y="516" width="34" height="5" rx="2" fill="#1a1828"/>
+    </g>
+    <g>
+      <path d="M 182 472 L 182 505 Q 182 515, 188 518 L 208 520 Q 214 518, 214 512 L 214 472 Z" fill="url(#rogueBootGrad)"/>
+      <rect x="180" y="468" width="36" height="10" rx="3" fill="#3a3048" stroke="#4a4060" stroke-width="0.8"/>
+      <line x1="184" y1="485" x2="212" y2="485" stroke="#4a3848" stroke-width="2"/>
+      <line x1="184" y1="495" x2="212" y2="495" stroke="#4a3848" stroke-width="2"/>
+      <rect x="192" y="483" width="6" height="5" rx="1" fill="#5a5a68" opacity="0.7"/>
+      <rect x="192" y="493" width="6" height="5" rx="1" fill="#5a5a68" opacity="0.7"/>
+      <rect x="181" y="516" width="34" height="5" rx="2" fill="#1a1828"/>
+    </g>
+
+    <!-- Head group (cursor-tracked) -->
+    <g id="rogue-head-group" style="transform-origin: 180px 120px;">
+      <!-- Hood -->
+      <g>
+        <path d="M 110 170 Q 100 120, 115 80 Q 130 45, 155 30 Q 170 22, 180 20 Q 190 22, 205 30 Q 230 45, 245 80 Q 260 120, 250 170 Q 240 190, 220 195 Q 200 200, 180 202 Q 160 200, 140 195 Q 120 190, 110 170 Z" fill="url(#rogueHoodGrad)"/>
+        <path d="M 115 165 Q 108 125, 120 85 Q 132 52, 152 38 L 140 50 Q 125 68, 118 95 Q 112 130, 118 162 Z" fill="#121028" opacity="0.4"/>
+        <path d="M 170 22 Q 178 15, 185 18 Q 192 14, 196 20 L 190 24 Q 184 20, 178 22 Z" fill="#1e1c38"/>
+        <path d="M 135 60 Q 150 50, 170 48" stroke="#3a3558" stroke-width="1.2" fill="none" opacity="0.5"/>
+        <path d="M 128 90 Q 148 78, 175 75" stroke="#3a3558" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M 225 60 Q 210 50, 190 48" stroke="#3a3558" stroke-width="1.2" fill="none" opacity="0.5"/>
+        <path d="M 128 168 Q 125 140, 130 110 Q 138 78, 155 55 Q 168 40, 180 38 Q 192 40, 205 55 Q 222 78, 230 110 Q 235 140, 232 168 Q 225 185, 210 190 Q 195 195, 180 196 Q 165 195, 150 190 Q 135 185, 128 168 Z" fill="none" stroke="#c8c8d8" stroke-width="4" opacity="0.8"/>
+        <path d="M 130 165 Q 127 138, 133 108 Q 140 80, 157 58 Q 170 44, 180 42 Q 190 44, 203 58 Q 220 80, 227 108 Q 233 138, 230 165" fill="none" stroke="#e8e8f0" stroke-width="1.5" opacity="0.4"/>
+        <path d="M 135 162 Q 133 135, 138 108 Q 145 82, 160 62 Q 172 48, 180 46 Q 188 48, 200 62 Q 215 82, 222 108 Q 227 135, 225 162 Q 218 178, 205 183 Q 192 188, 180 189 Q 168 188, 155 183 Q 142 178, 135 162 Z" fill="#0a0a14"/>
+        <ellipse cx="180" cy="160" rx="12" ry="4" fill="#161428" opacity="0.6"/>
+        <line x1="180" y1="148" x2="180" y2="158" stroke="#1a1830" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+      </g>
+      <!-- Glowing eyes -->
+      <g class="rogue-eyes-group">
+        <ellipse id="rogue-left-eye-ambient" cx="162" cy="128" rx="22" ry="18" fill="url(#rogueEyeGlowOuter)" filter="url(#rogueBigGlow)"/>
+        <ellipse id="rogue-right-eye-ambient" cx="200" cy="128" rx="22" ry="18" fill="url(#rogueEyeGlowOuter)" filter="url(#rogueBigGlow)"/>
+        <ellipse id="rogue-left-eye-base" cx="162" cy="128" rx="14" ry="10" fill="url(#rogueEyeGlow)"/>
+        <ellipse id="rogue-left-eye-mid" cx="162" cy="128" rx="8" ry="6" fill="#60f0ff"/>
+        <ellipse id="rogue-left-eye-bright" cx="162" cy="127" rx="5" ry="4" fill="#b0faff"/>
+        <ellipse id="rogue-left-eye-core" cx="162" cy="126" rx="3" ry="2.5" fill="#ffffff"/>
+        <ellipse id="rogue-right-eye-base" cx="200" cy="128" rx="14" ry="10" fill="url(#rogueEyeGlow)"/>
+        <ellipse id="rogue-right-eye-mid" cx="200" cy="128" rx="8" ry="6" fill="#60f0ff"/>
+        <ellipse id="rogue-right-eye-bright" cx="200" cy="127" rx="5" ry="4" fill="#b0faff"/>
+        <ellipse id="rogue-right-eye-core" cx="200" cy="126" rx="3" ry="2.5" fill="#ffffff"/>
+      </g>
+    </g>
+
+    <!-- Clasp at neck -->
+    <g>
+      <polygon points="180,192 186,198 180,204 174,198" fill="#8a7040" stroke="#c0a050" stroke-width="1"/>
+      <polygon points="180,194 184,198 180,202 176,198" fill="#c0a850"/>
+      <circle cx="180" cy="198" r="1.2" fill="#e8d070"/>
+    </g>
+
+    <!-- Cyan magic particles -->
+    <g filter="url(#rogueParticleGlow)">
+      <circle class="rogue-particle rogue-particle-d1" cx="118" cy="370" r="3" fill="#00e8ff" opacity="0.8"/>
+      <circle class="rogue-particle-alt rogue-particle-d2" cx="105" cy="390" r="2" fill="#00d0e8" opacity="0.6"/>
+      <circle class="rogue-particle rogue-particle-d3" cx="125" cy="400" r="2.5" fill="#40f0ff" opacity="0.7"/>
+      <circle class="rogue-particle-alt rogue-particle-d4" cx="95" cy="410" r="1.8" fill="#00e8ff" opacity="0.5"/>
+      <rect class="rogue-particle rogue-particle-d5" x="110" y="385" width="3" height="3" fill="#00e8ff" opacity="0.7" transform="rotate(45 111.5 386.5)"/>
+      <circle class="rogue-particle rogue-particle-d6" cx="130" cy="420" r="1.5" fill="#60f8ff" opacity="0.6"/>
+      <circle class="rogue-particle rogue-particle-d2" cx="245" cy="375" r="2.5" fill="#00e8ff" opacity="0.7"/>
+      <circle class="rogue-particle-alt rogue-particle-d3" cx="255" cy="395" r="2" fill="#40f0ff" opacity="0.6"/>
+      <circle class="rogue-particle rogue-particle-d4" cx="238" cy="405" r="3" fill="#00d0e8" opacity="0.8"/>
+      <circle class="rogue-particle-alt rogue-particle-d1" cx="260" cy="415" r="1.5" fill="#00e8ff" opacity="0.5"/>
+      <rect class="rogue-particle rogue-particle-d7" x="248" y="388" width="2.5" height="2.5" fill="#00e8ff" opacity="0.6" transform="rotate(45 249 389)"/>
+      <circle class="rogue-particle rogue-particle-d5" cx="155" cy="520" r="2" fill="#00e8ff" opacity="0.6"/>
+      <circle class="rogue-particle-alt rogue-particle-d3" cx="200" cy="522" r="2.5" fill="#40f0ff" opacity="0.5"/>
+      <circle class="rogue-particle rogue-particle-d8" cx="172" cy="525" r="1.5" fill="#00e8ff" opacity="0.7"/>
+      <rect class="rogue-particle-alt rogue-particle-d1" x="190" y="518" width="2" height="2" fill="#60f8ff" opacity="0.6" transform="rotate(45 191 519)"/>
+      <circle class="rogue-particle rogue-particle-d6" cx="140" cy="440" r="1" fill="#80f8ff" opacity="0.5"/>
+      <circle class="rogue-particle-alt rogue-particle-d4" cx="220" cy="445" r="1.2" fill="#80f8ff" opacity="0.4"/>
+    </g>
+
+    <!-- Ground shadow -->
+    <ellipse cx="180" cy="535" rx="65" ry="8" fill="#000000" opacity="0.3"/>
+  </svg>
+</div>
+
+<!-- ============ BP1: Cinematic Dialog Box ============ -->
+<div id="bp1-section">
+  <div class="dialog-box" id="dialog-box">
+    <div class="dialog-corner dialog-corner--top-left"></div>
+    <div class="dialog-corner dialog-corner--top-right"></div>
+    <div class="dialog-text-panel">
+      <div class="dialog-speaker-name" id="dialog-speaker" style="position:absolute;top:12px;left:28px;font-family:var(--font-pixel);font-size:10px;color:var(--gold);letter-spacing:1px;">???</div>
+      <div class="dialog-slide-counter" id="dialog-counter">1 / 3</div>
+      <div class="dialog-text" id="dialog-text"></div>
+      <div class="dialog-btn-row">
+        <button class="dialog-nav-btn dialog-nav-btn--prev hidden" id="dialog-prev">◄ PREV</button>
+        <button class="dialog-nav-btn dialog-nav-btn--next" id="dialog-next">▶ NEXT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BP2: Radial HUD Event Showcase ============ -->
+<div id="bp2-section">
+
+  <!-- Left sidebar removed — event details now in quest card modal -->
+
+  <!-- Radial HUD — Bronze Medallion -->
+  <div class="bp2-hud-container" id="bp2-hud-container">
+    <svg class="bp2-hud-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Bronze gradients -->
+        <linearGradient id="bp2-bronzeOuter" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%" stop-color="#b89050"/><stop offset="15%" stop-color="#8a6830"/>
+          <stop offset="35%" stop-color="#6b4c28"/><stop offset="55%" stop-color="#a08040"/>
+          <stop offset="75%" stop-color="#6b4c28"/><stop offset="90%" stop-color="#8a6830"/>
+          <stop offset="100%" stop-color="#5a3c1c"/>
+        </linearGradient>
+        <linearGradient id="bp2-bronzeMid" x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0%" stop-color="#7a5828"/><stop offset="25%" stop-color="#5c4020"/>
+          <stop offset="50%" stop-color="#8a6830"/><stop offset="75%" stop-color="#5c4020"/>
+          <stop offset="100%" stop-color="#6b4c28"/>
+        </linearGradient>
+        <linearGradient id="bp2-bronzeInner" x1="0" y1="0.2" x2="1" y2="0.8">
+          <stop offset="0%" stop-color="#9a7838"/><stop offset="30%" stop-color="#6b4c28"/>
+          <stop offset="60%" stop-color="#8a6830"/><stop offset="100%" stop-color="#5c4020"/>
+        </linearGradient>
+        <radialGradient id="bp2-centerShine" cx="45%" cy="40%" r="50%">
+          <stop offset="0%" stop-color="#c0a050" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="bp2-centerDark" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stop-color="#1e1e28"/><stop offset="60%" stop-color="#14141c"/>
+          <stop offset="100%" stop-color="#0e0e14"/>
+        </radialGradient>
+        <radialGradient id="bp2-glowGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#c09848" stop-opacity="0"/>
+          <stop offset="85%" stop-color="#c09848" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#c09848" stop-opacity="0"/>
+        </radialGradient>
+        <!-- Metal filters -->
+        <filter id="bp2-metalFull" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="3" stitchTiles="stitch" result="noise"/>
+          <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+          <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="textured"/>
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+          <feSpecularLighting in="blur" surfaceScale="6" specularConstant="0.45" specularExponent="22" lighting-color="#e8d090" result="specular">
+            <feDistantLight azimuth="225" elevation="48"/>
+          </feSpecularLighting>
+          <feComposite in="specular" in2="SourceAlpha" operator="in" result="specClip"/>
+          <feComposite in="textured" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.5" k4="0" result="final"/>
+          <feComposite in="final" in2="SourceAlpha" operator="in"/>
+        </filter>
+        <filter id="bp2-metalBevel" x="-5%" y="-5%" width="110%" height="110%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur"/>
+          <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.5" specularExponent="20" lighting-color="#e8d090" result="specular">
+            <feDistantLight azimuth="225" elevation="45"/>
+          </feSpecularLighting>
+          <feComposite in="specular" in2="SourceAlpha" operator="in" result="specClip"/>
+          <feComposite in="SourceGraphic" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0"/>
+        </filter>
+        <filter id="bp2-deepBevel" x="-5%" y="-5%" width="110%" height="110%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+          <feSpecularLighting in="blur" surfaceScale="8" specularConstant="0.4" specularExponent="25" lighting-color="#f0d890" result="specular">
+            <feDistantLight azimuth="220" elevation="50"/>
+          </feSpecularLighting>
+          <feComposite in="specular" in2="SourceAlpha" operator="in" result="specClip"/>
+          <feComposite in="SourceGraphic" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.5" k4="0"/>
+        </filter>
+      </defs>
+
+      <!-- Hover glow -->
+      <circle class="bp2-glow-ring" cx="250" cy="250" r="248" fill="url(#bp2-glowGrad)"/>
+
+      <!-- Outermost edge -->
+      <g id="bp2-ring-outer" style="transform-origin:250px 250px">
+        <circle cx="250" cy="250" r="246" fill="none" stroke="#1a1008" stroke-width="3"/>
+        <circle cx="250" cy="250" r="244" fill="none" stroke="#8a6830" stroke-width="1" opacity="0.5"/>
+      </g>
+
+      <!-- Thick outer ring -->
+      <circle cx="250" cy="250" r="237" fill="none" stroke="url(#bp2-bronzeOuter)" stroke-width="18" filter="url(#bp2-metalFull)"/>
+      <circle cx="250" cy="250" r="246" fill="none" stroke="#3a2010" stroke-width="0.8" opacity="0.7"/>
+      <circle cx="250" cy="250" r="228" fill="none" stroke="#c0a050" stroke-width="0.5" opacity="0.25"/>
+      <circle cx="250" cy="250" r="227" fill="none" stroke="#2a1808" stroke-width="0.8" opacity="0.6"/>
+
+      <!-- Engraved tick marks (scroll-rotated) -->
+      <g id="bp2-ring-ticks" style="transform-origin:250px 250px" opacity="0.5">
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(10 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(20 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(30 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(40 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(50 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(60 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(70 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(80 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(90 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(100 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(110 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(120 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(130 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(140 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(150 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(160 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(170 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(180 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(190 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(200 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(210 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(220 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(230 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(240 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(250 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(260 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(270 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(280 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(290 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(300 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(310 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(320 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="24" stroke="#c0a050" stroke-width="1.5" opacity="0.6" transform="rotate(330 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(340 250 250)"/>
+        <line x1="250" y1="10" x2="250" y2="18" stroke="#8a6830" stroke-width="0.6" opacity="0.3" transform="rotate(350 250 250)"/>
+      </g>
+
+      <!-- Middle ornate ring -->
+      <g id="bp2-ring-gold" style="transform-origin:250px 250px">
+        <circle cx="250" cy="250" r="212" fill="none" stroke="url(#bp2-bronzeMid)" stroke-width="24" filter="url(#bp2-metalFull)"/>
+        <circle cx="250" cy="250" r="224" fill="none" stroke="#c0a050" stroke-width="0.4" opacity="0.2"/>
+        <circle cx="250" cy="250" r="200" fill="none" stroke="#c0a050" stroke-width="0.4" opacity="0.2"/>
+        <circle cx="250" cy="250" r="201" fill="none" stroke="#2a1808" stroke-width="0.6" opacity="0.5"/>
+      </g>
+
+      <!-- Scrollwork / filigree (scroll-rotated counter) -->
+      <g id="bp2-ring-inner-ticks" style="transform-origin:250px 250px" filter="url(#bp2-metalBevel)">
+        <g fill="none" stroke="#a08040" stroke-width="1.8" opacity="0.55">
+          <path d="M 250 32 Q 270 50, 262 68 Q 254 82, 268 90"/>
+          <path d="M 250 32 Q 230 50, 238 68 Q 246 82, 232 90"/>
+          <path d="M 404 96 Q 392 118, 378 112 Q 364 106, 358 120"/>
+          <path d="M 404 96 Q 398 76, 384 82 Q 370 88, 366 74"/>
+          <path d="M 468 250 Q 450 270, 432 262 Q 418 254, 410 268"/>
+          <path d="M 468 250 Q 450 230, 432 238 Q 418 246, 410 232"/>
+          <path d="M 404 404 Q 382 392, 388 378 Q 394 364, 380 358"/>
+          <path d="M 404 404 Q 396 382, 382 388"/>
+          <path d="M 250 468 Q 230 450, 238 432 Q 246 418, 232 410"/>
+          <path d="M 250 468 Q 270 450, 262 432 Q 254 418, 268 410"/>
+          <path d="M 96 404 Q 118 392, 112 378 Q 106 364, 120 358"/>
+          <path d="M 96 404 Q 104 382, 118 388"/>
+          <path d="M 32 250 Q 50 230, 68 238 Q 82 246, 90 232"/>
+          <path d="M 32 250 Q 50 270, 68 262 Q 82 254, 90 268"/>
+          <path d="M 96 96 Q 118 108, 112 122 Q 106 136, 120 142"/>
+          <path d="M 96 96 Q 104 118, 118 112"/>
+        </g>
+        <!-- Rivet dots -->
+        <g fill="#7a5828" stroke="#c0a050" stroke-width="0.6" opacity="0.5">
+          <circle cx="250" cy="25" r="4"/><circle cx="250" cy="475" r="4"/>
+          <circle cx="25" cy="250" r="4"/><circle cx="475" cy="250" r="4"/>
+          <circle cx="91" cy="91" r="3.5"/><circle cx="409" cy="91" r="3.5"/>
+          <circle cx="91" cy="409" r="3.5"/><circle cx="409" cy="409" r="3.5"/>
+        </g>
+        <g fill="#3a2818" opacity="0.6">
+          <circle cx="250" cy="25" r="1.5"/><circle cx="250" cy="475" r="1.5"/>
+          <circle cx="25" cy="250" r="1.5"/><circle cx="475" cy="250" r="1.5"/>
+          <circle cx="91" cy="91" r="1.2"/><circle cx="409" cy="91" r="1.2"/>
+          <circle cx="91" cy="409" r="1.2"/><circle cx="409" cy="409" r="1.2"/>
+        </g>
+      </g>
+
+      <!-- Inner ring -->
+      <circle cx="250" cy="250" r="185" fill="none" stroke="url(#bp2-bronzeInner)" stroke-width="14" filter="url(#bp2-deepBevel)"/>
+      <circle cx="250" cy="250" r="192" fill="none" stroke="#2a1808" stroke-width="0.8" opacity="0.6"/>
+      <circle cx="250" cy="250" r="178" fill="none" stroke="#c0a050" stroke-width="0.4" opacity="0.2"/>
+      <circle cx="250" cy="250" r="177" fill="none" stroke="#1a1008" stroke-width="1" opacity="0.7"/>
+
+      <!-- Decorative dashed ring -->
+      <g id="bp2-ring-accent" style="transform-origin:250px 250px">
+        <circle cx="250" cy="250" r="172" fill="none" stroke="#5c4020" stroke-width="1.5" stroke-dasharray="3 8" opacity="0.35"/>
+      </g>
+
+      <!-- Inner border -->
+      <circle cx="250" cy="250" r="165" fill="none" stroke="#6b4c28" stroke-width="4" filter="url(#bp2-metalBevel)"/>
+      <circle cx="250" cy="250" r="163" fill="none" stroke="#1a1008" stroke-width="1.5"/>
+
+      <!-- Dark center fill -->
+      <circle cx="250" cy="250" r="162" fill="url(#bp2-centerDark)"/>
+      <circle cx="250" cy="250" r="160" fill="url(#bp2-centerShine)"/>
+      <circle cx="250" cy="250" r="161" fill="none" stroke="#000000" stroke-width="3" opacity="0.4"/>
+    </svg>
+
+    <!-- Inner canvas for event displays -->
+    <div class="bp2-inner-canvas">
+      <!-- Section 0: Intro -->
+      <div class="bp2-anim-layer active" data-bp2-anim="0">
+        <div class="bp2-event-icon">⚔</div>
+        <div class="bp2-event-inner-title">CHOOSE YOUR<br>QUEST</div>
+        <div class="bp2-event-inner-subtitle">SCROLL TO EXPLORE</div>
+      </div>
+
+      <!-- Section 1: Startup Pitch -->
+      <div class="bp2-anim-layer" data-bp2-anim="1">
+        <div class="bp2-event-icon">🎤</div>
+        <div class="bp2-event-inner-title">STARTUP<br>PITCH</div>
+        <div class="bp2-event-inner-subtitle">COMPETITION&nbsp; •&nbsp; 2 DAYS</div>
+        <button class="bp2-explore-btn" data-quest="0">▶ EXPLORE MORE</button>
+      </div>
+
+      <!-- Section 2: Ideathon -->
+      <div class="bp2-anim-layer" data-bp2-anim="2">
+        <div class="bp2-event-icon">💡</div>
+        <div class="bp2-event-inner-title">IDEATHON</div>
+        <div class="bp2-event-inner-subtitle">IDEATHON&nbsp; •&nbsp; 1 DAY</div>
+        <button class="bp2-explore-btn" data-quest="1">▶ EXPLORE MORE</button>
+      </div>
+
+      <!-- Section 3: Design Sprint -->
+      <div class="bp2-anim-layer" data-bp2-anim="3">
+        <div class="bp2-event-icon">🎨</div>
+        <div class="bp2-event-inner-title">DESIGN<br>SPRINT</div>
+        <div class="bp2-event-inner-subtitle">WORKSHOP&nbsp; +&nbsp; 1 DAY</div>
+        <button class="bp2-explore-btn" data-quest="2">▶ EXPLORE MORE</button>
+      </div>
+
+      <!-- Section 4: Hack The Future -->
+      <div class="bp2-anim-layer" data-bp2-anim="4">
+        <div class="bp2-event-icon">🔥</div>
+        <div class="bp2-event-inner-title">HACK THE<br>FUTURE</div>
+        <div class="bp2-event-inner-subtitle">HACKATHON&nbsp; •&nbsp; 2 DAYS</div>
+        <button class="bp2-explore-btn" data-quest="3">▶ EXPLORE MORE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="bp2-progress-bar">
+    <div class="bp2-progress-segment"><div class="bp2-fill"></div></div>
+    <div class="bp2-progress-segment"><div class="bp2-fill"></div></div>
+    <div class="bp2-progress-segment"><div class="bp2-fill"></div></div>
+    <div class="bp2-progress-segment"><div class="bp2-fill"></div></div>
+    <div class="bp2-progress-segment"><div class="bp2-fill"></div></div>
+  </div>
+</div>
+
+<!-- ============ BP2: Event Card Modal ============ -->
+<div class="modal-overlay" id="gem-modal">
+  <div class="event-card" id="event-card">
+    <div class="event-card-corner-tr"></div>
+    <div class="event-card-category" id="ec-category"></div>
+    <div class="event-card-name" id="ec-name"></div>
+    <div class="event-card-meta" id="ec-meta"></div>
+    <div class="event-card-desc" id="ec-desc"></div>
+    <div class="event-card-difficulty" id="ec-difficulty"></div>
+    <div class="event-card-actions">
+      <button class="btn-register" onclick="window.open('#register','_self')">REGISTER ▶</button>
+      <button class="btn-close" id="gem-modal-close">✕ CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Quest Card Modal ============ -->
+<div class="quest-modal-overlay" id="quest-modal">
+  <div class="quest-card" id="quest-card">
+    <button class="quest-close-btn" id="quest-close">✕</button>
+    <!-- Wooden Frame -->
+    <svg class="quest-frame-svg" viewBox="0 0 476 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="qWoodH" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#4a3828"/><stop offset="20%" stop-color="#5c4430"/>
+          <stop offset="50%" stop-color="#4a3626"/><stop offset="80%" stop-color="#584030"/>
+          <stop offset="100%" stop-color="#483624"/>
+        </linearGradient>
+        <linearGradient id="qWoodV" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a3828"/><stop offset="50%" stop-color="#5a4230"/>
+          <stop offset="100%" stop-color="#483624"/>
+        </linearGradient>
+        <radialGradient id="qCornerGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#6a5038"/><stop offset="100%" stop-color="#3a2818"/>
+        </radialGradient>
+        <radialGradient id="qStudGrad" cx="35%" cy="35%" r="55%">
+          <stop offset="0%" stop-color="#c0a870"/><stop offset="40%" stop-color="#8a7448"/>
+          <stop offset="100%" stop-color="#5a4828"/>
+        </radialGradient>
+        <filter id="qWoodNoise" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.3 1.8" numOctaves="3" stitchTiles="stitch" result="noise"/>
+          <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+          <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="textured"/>
+          <feComposite in="textured" in2="SourceAlpha" operator="in"/>
+        </filter>
+      </defs>
+      <rect x="0" y="0" width="476" height="22" rx="3" fill="url(#qWoodH)" filter="url(#qWoodNoise)"/>
+      <rect x="0" y="498" width="476" height="22" rx="3" fill="url(#qWoodH)" filter="url(#qWoodNoise)"/>
+      <rect x="0" y="18" width="22" height="484" rx="3" fill="url(#qWoodV)" filter="url(#qWoodNoise)"/>
+      <rect x="454" y="18" width="22" height="484" rx="3" fill="url(#qWoodV)" filter="url(#qWoodNoise)"/>
+      <rect x="0" y="0" width="28" height="28" rx="4" fill="url(#qCornerGrad)"/>
+      <circle cx="14" cy="14" r="5" fill="url(#qStudGrad)"/>
+      <rect x="448" y="0" width="28" height="28" rx="4" fill="url(#qCornerGrad)"/>
+      <circle cx="462" cy="14" r="5" fill="url(#qStudGrad)"/>
+      <rect x="0" y="492" width="28" height="28" rx="4" fill="url(#qCornerGrad)"/>
+      <circle cx="14" cy="506" r="5" fill="url(#qStudGrad)"/>
+      <rect x="448" y="492" width="28" height="28" rx="4" fill="url(#qCornerGrad)"/>
+      <circle cx="462" cy="506" r="5" fill="url(#qStudGrad)"/>
+      <rect x="20" y="20" width="436" height="480" rx="3" fill="none" stroke="#2a1a10" stroke-width="2" opacity="0.6"/>
+    </svg>
+    <!-- Parchment Content -->
+    <div class="quest-parchment">
+      <div class="quest-title" id="quest-title">EVENT NAME</div>
+      <div class="quest-divider">
+        <span class="quest-divider-line"></span>
+        <span class="quest-divider-dot"></span>
+        <span class="quest-divider-diamond"></span>
+        <span class="quest-divider-dot"></span>
+        <span class="quest-divider-line"></span>
+      </div>
+      <div class="quest-desc" id="quest-desc">Event description goes here.</div>
+      <div class="quest-stats-divider"></div>
+      <div class="quest-stat-row">
+        <span class="quest-stat-bullet"></span>
+        <span>Prize Pool:</span>
+        <span class="quest-stat-value" id="quest-prize">₹0</span>
+      </div>
+      <div class="quest-stat-row">
+        <span class="quest-stat-bullet"></span>
+        <span>Duration:</span>
+        <span class="quest-stat-value" id="quest-duration">-</span>
+      </div>
+      <div class="quest-stat-row">
+        <span class="quest-stat-bullet"></span>
+        <span>Difficulty:</span>
+        <span class="quest-stars" id="quest-stars"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Timeline: Winding Path with Event Pins ============ -->
+<div id="timeline-section">
+  <div class="timeline-overlay"></div>
+
+  <!-- Winding SVG path (top→bottom, clock tower to campus bottom) -->
+  <svg id="timeline-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <filter id="tl-glow">
+        <feGaussianBlur stdDeviation="4" result="blur" />
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <!-- Background path (dim, always visible) — smooth Catmull-Rom through traced campus road points -->
+    <path id="tl-path-bg" class="timeline-path-bg"
+      d="M 499,306 C 500,309 509,317 507,323 C 505,329 484,336 485,344 C 486,352 512,358 511,369 C 510,380 483,398 480,412 C 478,426 488,443 496,454 C 504,465 520,468 530,477 C 540,486 555,494 555,506 C 555,518 540,533 532,548 C 524,563 510,577 509,594 C 508,611 518,631 525,648 C 532,666 551,681 550,699 C 549,717 531,734 520,755 C 509,776 490,798 482,823 C 474,848 472,885 472,906 C 472,928 480,944 482,952" />
+    <!-- Illuminated path (drawn progressively as user scrolls) -->
+    <path id="tl-path" class="timeline-path" filter="url(#tl-glow)"
+      d="M 499,306 C 500,309 509,317 507,323 C 505,329 484,336 485,344 C 486,352 512,358 511,369 C 510,380 483,398 480,412 C 478,426 488,443 496,454 C 504,465 520,468 530,477 C 540,486 555,494 555,506 C 555,518 540,533 532,548 C 524,563 510,577 509,594 C 508,611 518,631 525,648 C 532,666 551,681 550,699 C 549,717 531,734 520,755 C 509,776 490,798 482,823 C 474,848 472,885 472,906 C 472,928 480,944 482,952" />
+    <!-- Moving dot -->
+    <circle id="tl-dot" class="timeline-dot" r="7" cx="499" cy="306" />
+  </svg>
+
+  <!-- Date indicator on left -->
+  <div class="tl-date-indicator" id="tl-date-indicator">◄ APRIL 2026</div>
+
+  <!-- Pins injected by JS -->
+
+  <!-- Side info card -->
+  <div id="tl-card" class="tl-card">
+    <div class="tl-card-name" id="tl-card-name"></div>
+    <div class="tl-card-desc" id="tl-card-desc"></div>
+    <div class="tl-card-meta" id="tl-card-meta"></div>
+    <button class="tl-card-close" id="tl-card-close">CLOSE</button>
+  </div>
+</div>
+
+<!-- ============ Scroll Container ============ -->
+<div id="scroll-container" aria-hidden="true"></div>
+
+<script>
+// ========================================
+// 1: Constants & Config
+// ========================================
+// Video is ~20.56s. Freeze at 12s for radial HUD.
+// Scroll 0→GEM_START scrubs video 0→12s
+// Scroll GEM_START→GEM_END = radial (video frozen at 12s)
+// Scroll GEM_END→1.0 scrubs video 12→20.56s
+const VIDEO_FREEZE_TIME = 12; // seconds — frame to hold during radial
+
+const BP = {
+  TITLE_END: 0,
+  CLOCK_START: 0,
+  CLOCK_END: 0.17,
+  NPC_START: 0.17,
+  NPC_END: 0.30,
+  GEM_START: 0.48,
+  GEM_END: 0.65,
+  // 0.65→0.85 = video scrub 12s→20.56s (no overlay)
+  TIMELINE_START: 0.85,
+  TIMELINE_END: 1.00
+};
+
+const EVENT_DATE = new Date('2026-04-10T09:00:00+05:30');
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ========================================
+// 2: Utilities
+// ========================================
+function lerp(a, b, t) {
+  return a + (b - a) * Math.max(0, Math.min(1, t));
+}
+
+function getScrollFraction() {
+  const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+  if (scrollH <= 0) return 0;
+  return Math.max(0, Math.min(1, window.scrollY / scrollH));
+}
+
+function getLocalFraction(frac, start, end) {
+  if (frac < start) return 0;
+  if (frac > end) return 1;
+  return (frac - start) / (end - start);
+}
+
+function formatCountdown(target) {
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) return { days: 0, hours: 0, mins: 0, text: '0d 0h 0m' };
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  return { days, hours, mins, text: `${days}d ${hours}h ${mins}m` };
+}
+
+// ========================================
+// 3: Video Scrub Engine
+// ========================================
+const video = document.getElementById('bg-video');
+let videoReady = false;
+let lastScrollFrac = -1;
+let videoSeeking = false;
+
+// Desktop: canplaythrough is ideal
+video.addEventListener('canplaythrough', () => {
+  videoReady = true;
+}, { once: true });
+
+// Mobile fallback: loadeddata with readyState >= 2 (HAVE_CURRENT_DATA) is enough
+// Mobile browsers rarely reach readyState 3/4 without user interaction
+video.addEventListener('loadeddata', () => {
+  if (video.readyState >= 2) videoReady = true;
+}, { once: true });
+
+// Extra fallback: loadedmetadata means we at least have duration
+video.addEventListener('loadedmetadata', () => {
+  // On mobile, try to unlock the video with a brief play+pause
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      video.pause();
+      video.currentTime = 0;
+      videoReady = true;
+    }).catch(() => {
+      // Autoplay blocked — mark ready anyway, scrub will work once user scrolls
+      // (touch scroll counts as user gesture on most mobile browsers)
+      if (video.readyState >= 1) videoReady = true;
+    });
+  }
+}, { once: true });
+
+// Track seeking state to avoid queuing multiple seeks on mobile
+video.addEventListener('seeking', () => { videoSeeking = true; });
+video.addEventListener('seeked', () => { videoSeeking = false; });
+
+function scrubVideo(frac) {
+  if (!videoReady || !video.duration) return;
+  // On mobile, skip if a seek is already in progress to avoid jank
+  if (videoSeeking) return;
+
+  let targetTime;
+
+  if (frac <= BP.GEM_START) {
+    // Before radial: scroll 0→GEM_START maps to video 0→VIDEO_FREEZE_TIME
+    const t = frac / BP.GEM_START; // 0→1
+    targetTime = t * VIDEO_FREEZE_TIME;
+  } else if (frac <= BP.GEM_END) {
+    // During radial: freeze at VIDEO_FREEZE_TIME
+    targetTime = VIDEO_FREEZE_TIME;
+  } else if (frac <= BP.TIMELINE_START) {
+    // After radial, before timeline: scroll GEM_END→TIMELINE_START maps to video 12→20.56s
+    const t = (frac - BP.GEM_END) / (BP.TIMELINE_START - BP.GEM_END); // 0→1
+    targetTime = VIDEO_FREEZE_TIME + t * (video.duration - VIDEO_FREEZE_TIME);
+  } else {
+    // During timeline: freeze at end of video
+    targetTime = video.duration;
+  }
+
+  if (Math.abs(video.currentTime - targetTime) > 0.05) {
+    video.currentTime = targetTime;
+  }
+}
+
+// ========================================
+// 4: Loading Screen
+// ========================================
+const loadingScreen = document.getElementById('loading-screen');
+const loadingBar = document.getElementById('loading-bar');
+let loadProgress = 0;
+let loadingDone = false;
+const loadStartTime = Date.now();
+
+function simulateLoading() {
+  if (loadingDone) return;
+  if (loadProgress < 90) {
+    loadProgress += (90 - loadProgress) * 0.05;
+    loadingBar.style.width = loadProgress + '%';
+  }
+  if (videoReady && loadProgress >= 89) {
+    finishLoading();
+    return;
+  }
+  requestAnimationFrame(simulateLoading);
+}
+
+function finishLoading() {
+  if (loadingDone) return;
+  loadingDone = true;
+  loadingBar.style.width = '100%';
+  const elapsed = Date.now() - loadStartTime;
+  const remaining = Math.max(0, 1500 - elapsed);
+  setTimeout(() => {
+    loadingScreen.classList.add('hidden');
+    initSections();
+  }, remaining);
+}
+
+// Start loading simulation
+requestAnimationFrame(simulateLoading);
+
+// Fallback: force finish after 5 seconds on mobile (video may never fully buffer)
+// or 8 seconds on desktop
+const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+setTimeout(() => {
+  if (!loadingDone) {
+    videoReady = true;
+    finishLoading();
+  }
+}, isMobileDevice ? 5000 : 8000);
+
+// ========================================
+// 5: CRT Noise Canvas
+// ========================================
+function initCRTNoise() {
+  if (reducedMotion) return;
+  const canvas = document.getElementById('crt-noise');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = 128;
+  canvas.height = 128;
+
+  let lastTime = 0;
+  const FPS = 8;
+  const interval = 1000 / FPS;
+
+  function drawNoise(time) {
+    requestAnimationFrame(drawNoise);
+    if (time - lastTime < interval) return;
+    lastTime = time;
+    const imageData = ctx.createImageData(128, 128);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = Math.random() * 255;
+      data[i] = v;
+      data[i + 1] = v;
+      data[i + 2] = v;
+      data[i + 3] = 12;
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+  requestAnimationFrame(drawNoise);
+}
+
+// ========================================
+// 6: HUD — Countdown, Nav, Scroll Indicator
+// ========================================
+const hud = document.getElementById('hud');
+const hudCountdown = document.getElementById('hud-countdown');
+const scrollHint = document.getElementById('scroll-hint');
+const navBtns = document.querySelectorAll('.hud-nav-btn');
+let scrollHintHidden = false;
+
+function updateHUDCountdown() {
+  const cd = formatCountdown(EVENT_DATE);
+  hudCountdown.textContent = cd.text;
+}
+
+// Nav button click → scroll
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = parseFloat(btn.dataset.target);
+    const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: target * scrollH, behavior: 'smooth' });
+  });
+});
+
+function updateHUDActiveBtn(frac) {
+  const targets = Array.from(navBtns).map(b => parseFloat(b.dataset.target));
+  let activeIdx = 0;
+  for (let i = targets.length - 1; i >= 0; i--) {
+    if (frac >= targets[i] - 0.02) { activeIdx = i; break; }
+  }
+  navBtns.forEach((b, i) => b.classList.toggle('active', i === activeIdx));
+}
+
+// Countdown updater — every second for clock hand accuracy
+setInterval(updateHUDCountdown, 1000);
+updateHUDCountdown();
+
+// ========================================
+// 7: BP0 — Title Screen (REMOVED)
+// ========================================
+// BP0 title screen removed — video starts immediately after loading
+
+// ========================================
+// 8: BP0.5 — Clock Tower (countdown removed)
+// ========================================
+function updateClockSection(frac) {
+  // No-op — countdown pill & banner removed
+}
+
+// ========================================
+// 9: BP1 — Cinematic NPC Dialogue (Rogue Character)
+// ========================================
+const bp1 = document.getElementById('bp1-section');
+const bp1Blur = document.getElementById('bp1-blur-overlay');
+const npc = document.getElementById('npc');
+const dialogText = document.getElementById('dialog-text');
+const dialogNext = document.getElementById('dialog-next');
+const dialogPrev = document.getElementById('dialog-prev');
+const dialogBox = document.getElementById('dialog-box');
+const dialogCounter = document.getElementById('dialog-counter');
+
+const dialogSlides = [
+  {
+    speaker: '???',
+    text: "Welcome to BITS Pilani,\nAdventurer. You stand\nbefore a place where\nlegends are forged."
+  },
+  {
+    speaker: 'THE\nWATCHER',
+    text: "E-Summit 2026 is the\nlargest entrepreneurship\nfestival in Rajasthan.\n20+ events. 3 epic days."
+  },
+  {
+    speaker: 'THE\nWATCHER',
+    text: "Prizes. Speakers. Founders.\nAll waiting below.\n\nScroll down to begin\nyour quest."
+  }
+];
+
+let currentSlide = 0;
+let isTyping = false;
+let typeTimer = null;
+let npcEntered = false;
+let npcCharacterVisible = false; // tracks whether character is on screen at all
+let dialogVisible = false;
+let typewriterComplete = false;
+
+function typeText(text, element, callback) {
+  // Clear any existing typewriter
+  if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+  isTyping = true;
+  typewriterComplete = false;
+  element.textContent = '';
+  let i = 0;
+  if (reducedMotion) {
+    element.textContent = text;
+    isTyping = false;
+    typewriterComplete = true;
+    if (callback) callback();
+    return;
+  }
+  typeTimer = setInterval(() => {
+    if (i < text.length) {
+      element.textContent += text[i];
+      i++;
+    }
+    if (i >= text.length) {
+      clearInterval(typeTimer);
+      typeTimer = null;
+      isTyping = false;
+      typewriterComplete = true;
+      if (callback) callback();
+    }
+  }, 38);
+}
+
+function finishTyping() {
+  if (!isTyping) return;
+  if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+  if (currentSlide >= 0 && currentSlide < dialogSlides.length) {
+    dialogText.textContent = dialogSlides[currentSlide].text;
+  }
+  isTyping = false;
+  typewriterComplete = true;
+}
+
+function updateDialogButtons() {
+  const isFirst = currentSlide === 0;
+  const isLast = currentSlide === dialogSlides.length - 1;
+  dialogPrev.classList.toggle('hidden', isFirst);
+  dialogNext.textContent = isLast ? '▶ BEGIN QUEST' : '▶ NEXT';
+}
+
+function showSlide(idx) {
+  if (idx < 0 || idx >= dialogSlides.length) return;
+  currentSlide = idx;
+  const slide = dialogSlides[idx];
+
+  // Update counter
+  dialogCounter.textContent = `${idx + 1} / ${dialogSlides.length}`;
+
+  // Update speaker
+  document.getElementById('dialog-speaker').innerHTML = slide.speaker.replace('\n', '<br/>');
+
+  // Update buttons
+  updateDialogButtons();
+
+  // Flash border on slide change
+  if (idx > 0) {
+    dialogBox.classList.add('flash');
+    setTimeout(() => dialogBox.classList.remove('flash'), 80);
+  }
+
+  typeText(slide.text, dialogText);
+}
+
+// Next button
+dialogNext.addEventListener('click', () => {
+  if (isTyping) {
+    finishTyping();
+    return;
+  }
+  if (currentSlide < dialogSlides.length - 1) {
+    showSlide(currentSlide + 1);
+  }
+  // Last slide "BEGIN QUEST" — just let user scroll
+});
+
+// Prev button
+dialogPrev.addEventListener('click', () => {
+  if (isTyping) {
+    finishTyping();
+    return;
+  }
+  if (currentSlide > 0) {
+    showSlide(currentSlide - 1);
+  }
+});
+
+function showCharacter() {
+  if (npcCharacterVisible) return;
+  npcCharacterVisible = true;
+
+  if (!reducedMotion) {
+    anime({
+      targets: npc,
+      opacity: [0, 1],
+      duration: 800,
+      easing: 'easeOutExpo',
+      complete: () => { npc.classList.add('idle'); }
+    });
+  } else {
+    npc.style.opacity = '1';
+    npc.classList.add('idle');
+  }
+}
+
+function hideCharacter() {
+  if (!npcCharacterVisible) return;
+  npcCharacterVisible = false;
+  npc.classList.remove('idle', 'companion');
+  npc.style.opacity = '0';
+  npc.style.top = '2vh';
+  npc.style.bottom = '';
+  npc.style.left = '50%';
+  npc.style.right = '';
+  npc.style.transform = 'translateX(-50%)';
+}
+
+function showDialog() {
+  if (dialogVisible) return;
+  dialogVisible = true;
+
+  // Reset dialog state
+  currentSlide = 0;
+  if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+  isTyping = false;
+  dialogText.textContent = '';
+
+  bp1Blur.classList.add('visible');
+
+  if (!reducedMotion) {
+    setTimeout(() => {
+      bp1.classList.add('visible');
+      anime({
+        targets: dialogBox,
+        translateY: ['100%', '0%'],
+        duration: 600,
+        easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+        begin: () => { dialogBox.classList.add('visible'); },
+        complete: () => { showSlide(0); }
+      });
+    }, npcCharacterVisible ? 100 : 500);
+  } else {
+    bp1.classList.add('visible');
+    dialogBox.classList.add('visible');
+    dialogBox.style.transform = 'translateY(0)';
+    showSlide(0);
+  }
+}
+
+function hideDialog() {
+  if (!dialogVisible) return;
+  dialogVisible = false;
+
+  if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+  isTyping = false;
+  typewriterComplete = false;
+  currentSlide = 0;
+  dialogText.textContent = '';
+
+  bp1Blur.classList.remove('visible');
+  bp1.classList.remove('visible');
+  dialogBox.classList.remove('visible');
+  dialogBox.style.transform = 'translateY(100%)';
+}
+
+function enterCompanionMode() {
+  npc.classList.add('companion');
+  // Ensure positioning overrides for bottom-left
+  npc.style.top = 'auto';
+  npc.style.bottom = '0';
+  npc.style.left = '2vw';
+  npc.style.right = 'auto';
+  npc.style.transform = 'translateX(0)';
+}
+
+function exitCompanionMode() {
+  npc.classList.remove('companion');
+  npc.style.top = '2vh';
+  npc.style.bottom = '';
+  npc.style.left = '50%';
+  npc.style.right = '';
+  npc.style.transform = 'translateX(-50%)';
+}
+
+function updateBP1(frac) {
+  const inDialogRange = frac >= BP.NPC_START && frac <= BP.NPC_END;
+  const characterShouldBeVisible = frac >= BP.NPC_START;
+
+  // Character visibility
+  if (characterShouldBeVisible && !npcCharacterVisible) {
+    showCharacter();
+  }
+  if (!characterShouldBeVisible && npcCharacterVisible) {
+    hideCharacter();
+    hideDialog();
+  }
+
+  // Dialog visibility (only during NPC range)
+  if (inDialogRange && npcCharacterVisible && !dialogVisible) {
+    exitCompanionMode();
+    showDialog();
+  }
+  if (!inDialogRange && dialogVisible) {
+    hideDialog();
+  }
+
+  // Companion mode: after dialog range but character still visible
+  if (!inDialogRange && npcCharacterVisible && frac > BP.NPC_END) {
+    enterCompanionMode();
+  }
+}
+
+// ========================================
+// 9b: Rogue Character — Cursor Eye Tracking
+// ========================================
+(function initRogueEyeTracking() {
+  const rogueSvg = npc.querySelector('.rogue-svg');
+  if (!rogueSvg) return;
+  const headGroup = document.getElementById('rogue-head-group');
+  if (!headGroup) return;
+
+  const LEFT_EYE_CX = 162, LEFT_EYE_CY = 128;
+  const RIGHT_EYE_CX = 200, RIGHT_EYE_CY = 128;
+  const HEAD_CENTER_X = 180, HEAD_CENTER_Y = 120;
+  const EYE_MAX_OFFSET = 6;
+  const HEAD_MAX_OFFSET = 4;
+  const HEAD_MAX_ROTATE = 5;
+  const LERP_FACTOR = 0.08;
+
+  let current = { ex: 0, ey: 0, hx: 0, hy: 0, hr: 0 };
+  let target = { ex: 0, ey: 0, hx: 0, hy: 0, hr: 0 };
+
+  const leftEyeParts = ['rogue-left-eye-ambient','rogue-left-eye-base','rogue-left-eye-mid','rogue-left-eye-bright','rogue-left-eye-core'].map(id => document.getElementById(id));
+  const rightEyeParts = ['rogue-right-eye-ambient','rogue-right-eye-base','rogue-right-eye-mid','rogue-right-eye-bright','rogue-right-eye-core'].map(id => document.getElementById(id));
+
+  const leftEyeBase = leftEyeParts.map(el => el ? ({ cx: parseFloat(el.getAttribute('cx')), cy: parseFloat(el.getAttribute('cy')) }) : null);
+  const rightEyeBase = rightEyeParts.map(el => el ? ({ cx: parseFloat(el.getAttribute('cx')), cy: parseFloat(el.getAttribute('cy')) }) : null);
+
+  function pageToSVG(px, py) {
+    const rect = rogueSvg.getBoundingClientRect();
+    const scaleX = 360 / rect.width;
+    const scaleY = 560 / rect.height;
+    return { x: (px - rect.left) * scaleX, y: (py - rect.top) * scaleY };
+  }
+
+  function clampVal(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function lerpVal(a, b, t) { return a + (b - a) * t; }
+
+  function onPointerMove(e) {
+    const { x, y } = pageToSVG(e.clientX, e.clientY);
+    const dx = x - HEAD_CENTER_X;
+    const dy = y - HEAD_CENTER_Y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = 300;
+    const factor = Math.min(dist / maxDist, 1);
+    const nx = dist > 0 ? dx / dist : 0;
+    const ny = dist > 0 ? dy / dist : 0;
+
+    target.ex = nx * EYE_MAX_OFFSET * factor;
+    target.ey = ny * EYE_MAX_OFFSET * factor * 0.7;
+    target.hx = nx * HEAD_MAX_OFFSET * factor;
+    target.hy = ny * HEAD_MAX_OFFSET * factor * 0.5;
+    target.hr = clampVal(dx / maxDist * HEAD_MAX_ROTATE, -HEAD_MAX_ROTATE, HEAD_MAX_ROTATE);
+  }
+
+  const eyeMultipliers = [0.3, 0.5, 0.75, 1.0, 1.0];
+
+  function animateEyes() {
+    current.ex = lerpVal(current.ex, target.ex, LERP_FACTOR);
+    current.ey = lerpVal(current.ey, target.ey, LERP_FACTOR);
+    current.hx = lerpVal(current.hx, target.hx, LERP_FACTOR);
+    current.hy = lerpVal(current.hy, target.hy, LERP_FACTOR);
+    current.hr = lerpVal(current.hr, target.hr, LERP_FACTOR);
+
+    headGroup.setAttribute('transform',
+      `translate(${current.hx.toFixed(2)}, ${current.hy.toFixed(2)}) rotate(${current.hr.toFixed(2)}, ${HEAD_CENTER_X}, ${HEAD_CENTER_Y})`
+    );
+
+    leftEyeParts.forEach((el, i) => {
+      if (!el || !leftEyeBase[i]) return;
+      const m = eyeMultipliers[i];
+      el.setAttribute('cx', (leftEyeBase[i].cx + current.ex * m).toFixed(2));
+      el.setAttribute('cy', (leftEyeBase[i].cy + current.ey * m).toFixed(2));
+    });
+    rightEyeParts.forEach((el, i) => {
+      if (!el || !rightEyeBase[i]) return;
+      const m = eyeMultipliers[i];
+      el.setAttribute('cx', (rightEyeBase[i].cx + current.ex * m).toFixed(2));
+      el.setAttribute('cy', (rightEyeBase[i].cy + current.ey * m).toFixed(2));
+    });
+
+    requestAnimationFrame(animateEyes);
+  }
+
+  document.addEventListener('mousemove', onPointerMove);
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 0) onPointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+  });
+  requestAnimationFrame(animateEyes);
+})();
+
+// ========================================
+// 10: BP2 — Radial HUD Event Showcase
+// ========================================
+const bp2 = document.getElementById('bp2-section');
+const gemModal = document.getElementById('gem-modal');
+const gemModalClose = document.getElementById('gem-modal-close');
+let bp2Initialized = false;
+let bp2AnimatedIn = false;
+
+const BP2_TOTAL_SECTIONS = 5;
+
+// Event data for the modal (kept for compatibility)
+const gemEvents = [
+  {
+    name: 'STARTUP PITCH',
+    category: 'Competition',
+    color: '#ff4444',
+    prize: '₹1,00,000',
+    difficulty: 4,
+    duration: '2 Days',
+    description: 'Pitch your startup idea to VCs and industry leaders. Top teams win funding and mentorship.',
+    announced: true
+  },
+  {
+    name: 'IDEATHON',
+    category: 'Ideathon',
+    color: '#3366ff',
+    prize: '₹75,000',
+    difficulty: 3,
+    duration: '1 Day',
+    description: 'Rapid ideation challenge. Prototype a solution in 24 hours.',
+    announced: true
+  },
+  {
+    name: 'DESIGN SPRINT',
+    category: 'Workshop',
+    color: '#33cc66',
+    prize: '₹50,000',
+    difficulty: 2,
+    duration: '1 Day',
+    description: 'Learn design thinking from industry experts. Build a prototype from scratch.',
+    announced: true
+  },
+  {
+    name: 'HACK THE FUTURE',
+    category: 'Competition',
+    color: '#ffaa00',
+    prize: '₹80,000',
+    difficulty: 5,
+    duration: '2 Days',
+    description: 'The ultimate hackathon. Build, ship, demo. Tracks: AI/ML, FinTech, HealthTech.',
+    announced: true
+  }
+];
+
+// Initialize BP2 HUD (medallion tick marks are baked into SVG)
+function initBP2HUD() {
+  if (bp2Initialized) return;
+  bp2Initialized = true;
+}
+
+function fireBP2EntranceAnimation() {
+  if (!reducedMotion) {
+    anime({
+      targets: '.bp2-hud-container',
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      duration: 800,
+      easing: 'easeOutExpo'
+    });
+    // Left sidebar removed
+    anime({
+      targets: '.bp2-progress-bar',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: 500,
+      delay: 400,
+      easing: 'easeOutCubic'
+    });
+  }
+}
+
+function openGemModal(idx) {
+  const evt = gemEvents[idx];
+  const stars = '★'.repeat(evt.difficulty) + '☆'.repeat(5 - evt.difficulty);
+  document.getElementById('ec-category').textContent = evt.category;
+  document.getElementById('ec-category').style.color = evt.color;
+  document.getElementById('ec-name').textContent = evt.name;
+  document.getElementById('ec-meta').innerHTML = `
+    <div class="event-card-meta-item">PRIZE<span>${evt.prize}</span></div>
+    <div class="event-card-meta-item">DURATION<span>${evt.duration}</span></div>
+    <div class="event-card-meta-item">CATEGORY<span>${evt.category}</span></div>
+  `;
+  document.getElementById('ec-desc').textContent = evt.description;
+  document.getElementById('ec-difficulty').textContent = `Difficulty: ${stars}`;
+
+  gemModal.classList.add('open');
+
+  if (!reducedMotion) {
+    anime({
+      targets: '#event-card',
+      translateY: [80, 0],
+      opacity: [0, 1],
+      duration: 500,
+      easing: 'easeOutExpo'
+    });
+  }
+}
+
+function closeGemModal() {
+  if (!reducedMotion) {
+    anime({
+      targets: '#event-card',
+      translateY: [0, 80],
+      opacity: [1, 0],
+      duration: 300,
+      easing: 'easeInCubic',
+      complete: () => gemModal.classList.remove('open')
+    });
+  } else {
+    gemModal.classList.remove('open');
+  }
+}
+
+gemModalClose.addEventListener('click', closeGemModal);
+gemModal.addEventListener('click', (e) => {
+  if (e.target === gemModal) closeGemModal();
+});
+
+// ========================================
+// Quest Card Modal
+// ========================================
+const questModal = document.getElementById('quest-modal');
+const questClose = document.getElementById('quest-close');
+
+function openQuestCard(idx) {
+  const evt = gemEvents[idx];
+  if (!evt) return;
+  document.getElementById('quest-title').textContent = evt.name;
+  document.getElementById('quest-desc').textContent = evt.description;
+  document.getElementById('quest-prize').textContent = evt.prize;
+  document.getElementById('quest-duration').textContent = evt.duration;
+
+  // Render difficulty stars
+  const starsEl = document.getElementById('quest-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    star.setAttribute('class', 'quest-star');
+    star.setAttribute('viewBox', '0 0 20 20');
+    if (i < evt.difficulty) {
+      star.innerHTML = '<polygon points="10,2 12.5,7.5 18,8 14,12 15,18 10,15 5,18 6,12 2,8 7.5,7.5" fill="#e8c830" stroke="#b09820" stroke-width="0.8"/>';
+    } else {
+      star.innerHTML = '<polygon points="10,2 12.5,7.5 18,8 14,12 15,18 10,15 5,18 6,12 2,8 7.5,7.5" fill="#8a8480" stroke="#6a6460" stroke-width="0.8" opacity="0.5"/>';
+    }
+    starsEl.appendChild(star);
+  }
+
+  questModal.classList.add('open');
+  if (!reducedMotion) {
+    anime({
+      targets: '#quest-card',
+      scale: [0.9, 1],
+      opacity: [0, 1],
+      duration: 400,
+      easing: 'easeOutExpo'
+    });
+  }
+}
+
+function closeQuestCard() {
+  if (!reducedMotion) {
+    anime({
+      targets: '#quest-card',
+      scale: [1, 0.9],
+      opacity: [1, 0],
+      duration: 250,
+      easing: 'easeInCubic',
+      complete: () => questModal.classList.remove('open')
+    });
+  } else {
+    questModal.classList.remove('open');
+  }
+}
+
+questClose.addEventListener('click', closeQuestCard);
+questModal.addEventListener('click', (e) => { if (e.target === questModal) closeQuestCard(); });
+
+// Wire up Explore More buttons inside medallion
+document.querySelectorAll('.bp2-explore-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = parseInt(btn.dataset.quest);
+    openQuestCard(idx);
+  });
+});
+
+// The first 20% of BP2 scroll range is a buffer (empty transition from BP1).
+// The radial HUD only appears after the user has truly "arrived" at BP2.
+// No ramp needed — video scrubs 0.30→0.48 naturally before radial appears
+const BP2_RAMP_FRACTION = 0;
+
+function updateBP2(frac) {
+  const inRange = frac >= BP.GEM_START && frac <= BP.GEM_END;
+  const rawProgress = inRange ? (frac - BP.GEM_START) / (BP.GEM_END - BP.GEM_START) : 0;
+
+  // HUD only becomes visible after the ramp-in buffer
+  const hudVisible = inRange && rawProgress >= BP2_RAMP_FRACTION;
+  bp2.classList.toggle('visible', hudVisible);
+
+  if (hudVisible) {
+    initBP2HUD();
+
+    // Entrance animation once
+    if (!bp2AnimatedIn) {
+      bp2AnimatedIn = true;
+      fireBP2EntranceAnimation();
+    }
+
+    // Remap progress: 0 at ramp end → 1 at BP2 end
+    const effectiveProgress = (rawProgress - BP2_RAMP_FRACTION) / (1 - BP2_RAMP_FRACTION);
+    const sectionProgress = effectiveProgress * BP2_TOTAL_SECTIONS;
+    const currentSection = Math.min(Math.floor(sectionProgress), BP2_TOTAL_SECTIONS - 1);
+    const sectionFrac = sectionProgress - currentSection;
+
+    // Update inner canvas animations
+    document.querySelectorAll('.bp2-anim-layer').forEach((a, i) => {
+      a.classList.toggle('active', i === currentSection);
+    });
+
+    // Update progress bar
+    document.querySelectorAll('.bp2-progress-segment .bp2-fill').forEach((fill, i) => {
+      if (i < currentSection) {
+        fill.style.width = '100%';
+      } else if (i === currentSection) {
+        fill.style.width = (sectionFrac * 100) + '%';
+      } else {
+        fill.style.width = '0%';
+      }
+    });
+
+    // Rotate HUD rings based on scroll within BP2
+    const ringOuter = document.getElementById('bp2-ring-outer');
+    const ringGold = document.getElementById('bp2-ring-gold');
+    const ringTicks = document.getElementById('bp2-ring-ticks');
+    const ringInnerTicks = document.getElementById('bp2-ring-inner-ticks');
+    const ringAccent = document.getElementById('bp2-ring-accent');
+
+    if (ringOuter) {
+      const rot1 = effectiveProgress * 360;
+      const rot2 = effectiveProgress * -200;
+      const rot3 = effectiveProgress * 280;
+      const rot4 = effectiveProgress * -150;
+      const rot5 = effectiveProgress * 320;
+
+      ringOuter.style.transform = `rotate(${rot1}deg)`;
+      ringGold.style.transform = `rotate(${rot2}deg)`;
+      ringTicks.style.transform = `rotate(${rot3}deg)`;
+      ringInnerTicks.style.transform = `rotate(${rot4}deg)`;
+      ringAccent.style.transform = `rotate(${rot5}deg)`;
+    }
+  } else {
+    // Reset when leaving so re-entering replays the entrance
+    if (bp2AnimatedIn) {
+      bp2AnimatedIn = false;
+    }
+  }
+}
+
+// ========================================
+// 11: Timeline — Winding Path with Event Pins
+// ========================================
+const tlSection = document.getElementById('timeline-section');
+const tlPath = document.getElementById('tl-path');
+const tlDot = document.getElementById('tl-dot');
+const tlCard = document.getElementById('tl-card');
+const tlCardName = document.getElementById('tl-card-name');
+const tlCardDesc = document.getElementById('tl-card-desc');
+const tlCardMeta = document.getElementById('tl-card-meta');
+const tlCardClose = document.getElementById('tl-card-close');
+const tlDateIndicator = document.getElementById('tl-date-indicator');
+let tlPathLength = 0;
+let tlPinsCreated = false;
+let tlAnimatedIn = false;
+
+// Event pins along the winding path (t = 0 at top, 1 at bottom)
+// Desktop pin positions (viewport %) — DO NOT CHANGE
+const tlEvents = [
+  { name: 'OPENING CEREMONY', icon: '🎪', date: 'DAY 1', t: 0.04, x: 42, y: 32, desc: 'Grand inauguration with keynote speakers and the official E-Summit launch.', category: 'CEREMONY', color: '#FFD700', tba: false },
+  { name: 'STARTUP PITCH', icon: '🎤', date: 'DAY 1', t: 0.14, x: 55, y: 38, desc: 'Pitch your startup idea to VCs and industry leaders. Top teams win funding and mentorship.', category: 'COMP', color: '#E74C3C', tba: false },
+  { name: 'AI/ML WORKSHOP', icon: '🤖', date: 'DAY 1', t: 0.25, x: 41, y: 45, desc: 'Hands-on deep learning workshop with cutting-edge industry tools.', category: 'WORKSHOP', color: '#3498DB', tba: false },
+  { name: 'IDEATHON', icon: '💡', date: 'DAY 1', t: 0.37, x: 57, y: 50, desc: 'Rapid ideation challenge. Prototype a solution in 24 hours.', category: 'COMP', color: '#9B59B6', tba: false },
+  { name: 'DESIGN SPRINT', icon: '🎨', date: 'DAY 2', t: 0.48, x: 44, y: 56, desc: 'Learn design thinking from industry experts. Build a prototype from scratch.', category: 'WORKSHOP', color: '#2ECC71', tba: false },
+  { name: 'VC PANEL', icon: '🚀', date: 'DAY 2', t: 0.58, x: 57, y: 63, desc: 'Top VCs discuss the future of AI investment and startup landscape.', category: 'TALK', color: '#F39C12', tba: false },
+  { name: 'HACK THE FUTURE', icon: '🔥', date: 'DAY 2', t: 0.70, x: 44, y: 71, desc: 'The ultimate 36-hour hackathon. Build, ship, demo. Tracks: AI/ML, FinTech, HealthTech.', category: 'COMP', color: '#E74C3C', tba: false },
+  { name: 'MYSTERY EVENT', icon: '❓', date: 'DAY 3', t: 0.82, x: 56, y: 80, desc: 'To be announced. Stay tuned!', category: '???', color: '#666', tba: true },
+  { name: 'CLOSING CEREMONY', icon: '🏆', date: 'DAY 3', t: 0.95, x: 41, y: 92, desc: 'Grand finale with surprise guest speaker, awards, and networking.', category: 'CEREMONY', color: '#FFD700', tba: false }
+];
+
+// Desktop path data — DO NOT CHANGE
+const TL_PATH_DESKTOP = "M 499,306 C 500,309 509,317 507,323 C 505,329 484,336 485,344 C 486,352 512,358 511,369 C 510,380 483,398 480,412 C 478,426 488,443 496,454 C 504,465 520,468 530,477 C 540,486 555,494 555,506 C 555,518 540,533 532,548 C 524,563 510,577 509,594 C 508,611 518,631 525,648 C 532,666 551,681 550,699 C 549,717 531,734 520,755 C 509,776 490,798 482,823 C 474,848 472,885 472,906 C 472,928 480,944 482,952";
+
+// Mobile path data — designed for 430x932 reference phone, coordinates in SVG units
+// The viewBox will scale proportionally for other phone sizes
+const TL_PATH_MOBILE = "M 507,310 C 507,317 520,317 533,323 S 503,332 474,340 S 531,350 588,359 S 529,377 470,394 S 458,409 447,425 S 466,442 486,459 S 558,470 630,481 S 658,495 686,510 S 612,550 537,590 S 567,617 598,644 S 637,674 677,704 S 598,744 519,783 S 462,831 405,879 S 433,935 460,990";
+
+// Reference mobile screen: 430x932. Path bounds: x ~405-686, y ~310-990
+const MOBILE_REF_W = 430;
+const MOBILE_REF_H = 932;
+
+const tlSvg = document.getElementById('timeline-svg');
+const tlPathBg = document.getElementById('tl-path-bg');
+let tlIsMobile = false;
+
+function isMobileTimeline() {
+  return window.innerWidth <= 768;
+}
+
+function svgPointToViewport(svgX, svgY) {
+  // Convert SVG coords to viewport percentages using the SVG's screen CTM
+  const pt = tlSvg.createSVGPoint();
+  pt.x = svgX;
+  pt.y = svgY;
+  const ctm = tlSvg.getScreenCTM();
+  if (!ctm) return { x: svgX / 10, y: svgY / 10 }; // fallback
+  const screenPt = pt.matrixTransform(ctm);
+  return {
+    x: (screenPt.x / window.innerWidth) * 100,
+    y: (screenPt.y / window.innerHeight) * 100
+  };
+}
+
+function getMobileViewBox() {
+  // The path was designed for 430x932. We use a viewBox with the same aspect
+  // ratio as the current phone so the path maps 1:1 and scales uniformly.
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const phoneAspect = vw / vh; // e.g. 430/932 ≈ 0.461
+
+  // Path center: x ≈ 545, y ≈ 650
+  // We build a viewBox whose aspect matches the phone, centered on the path.
+  // Reference viewBox width/height that frames the path with padding:
+  const refVBW = 330; // covers x 380–710
+  const refVBH = 720; // covers y 290–1010
+  const refAspect = refVBW / refVBH; // ≈ 0.458
+
+  let vbW, vbH;
+  if (phoneAspect > refAspect) {
+    // Phone is wider than reference — expand width to match
+    vbH = refVBH;
+    vbW = vbH * phoneAspect;
+  } else {
+    // Phone is taller than reference — expand height to match
+    vbW = refVBW;
+    vbH = vbW / phoneAspect;
+  }
+
+  // Center on path midpoint (545, 650)
+  const cx = 545, cy = 650;
+  const vbX = cx - vbW / 2;
+  const vbY = cy - vbH / 2;
+
+  return `${vbX} ${vbY} ${vbW} ${vbH}`;
+}
+
+function applyTimelinePath() {
+  const mobile = isMobileTimeline();
+  const pathData = mobile ? TL_PATH_MOBILE : TL_PATH_DESKTOP;
+
+  tlPath.setAttribute('d', pathData);
+  tlPathBg.setAttribute('d', pathData);
+
+  if (mobile) {
+    // Dynamic viewBox that matches phone aspect ratio, centered on path
+    tlSvg.setAttribute('viewBox', getMobileViewBox());
+    tlSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  } else {
+    // Desktop: original square viewBox
+    tlSvg.setAttribute('viewBox', '0 0 1000 1000');
+    tlSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  }
+
+  tlIsMobile = mobile;
+
+  // Reset path length so it recalculates
+  tlPathLength = 0;
+}
+
+function createTLPins() {
+  if (tlPinsCreated) return;
+  tlPinsCreated = true;
+
+  tlEvents.forEach((evt, i) => {
+    const pin = document.createElement('div');
+    pin.className = 'tl-pin' + (evt.tba ? ' tba' : '');
+    pin.dataset.index = i;
+    pin.dataset.t = evt.t;
+
+    // Initial position — will be updated by repositionTLPins
+    pin.style.left = evt.x + '%';
+    pin.style.top = evt.y + '%';
+
+    const icon = document.createElement('div');
+    icon.className = 'tl-pin-icon';
+    icon.textContent = evt.icon;
+    pin.appendChild(icon);
+
+    const name = document.createElement('div');
+    name.className = 'tl-pin-name';
+    name.textContent = evt.name;
+    pin.appendChild(name);
+
+    const date = document.createElement('div');
+    date.className = 'tl-pin-date';
+    date.textContent = evt.date;
+    pin.appendChild(date);
+
+    if (!evt.tba) {
+      pin.addEventListener('click', () => openTLCard(i, pin));
+    }
+
+    tlSection.appendChild(pin);
+  });
+
+  repositionTLPins();
+}
+
+function repositionTLPins() {
+  if (!tlPathLength) return;
+  const mobile = isMobileTimeline();
+  const pins = document.querySelectorAll('.tl-pin');
+
+  pins.forEach(pin => {
+    const idx = parseInt(pin.dataset.index);
+    const evt = tlEvents[idx];
+
+    if (mobile) {
+      // On mobile, compute position from the path itself
+      const pathPoint = tlPath.getPointAtLength(evt.t * tlPathLength);
+      const vp = svgPointToViewport(pathPoint.x, pathPoint.y);
+      // Alternate pins left/right of path for readability
+      const offset = (idx % 2 === 0) ? -12 : 12;
+      pin.style.left = Math.max(2, Math.min(85, vp.x + offset)) + '%';
+      pin.style.top = vp.y + '%';
+    } else {
+      // Desktop: use fixed positions
+      pin.style.left = evt.x + '%';
+      pin.style.top = evt.y + '%';
+    }
+  });
+}
+
+function openTLCard(idx, pinEl) {
+  const evt = tlEvents[idx];
+  tlCardName.textContent = evt.icon + ' ' + evt.name;
+  tlCardName.style.color = evt.color;
+  tlCardDesc.textContent = evt.desc;
+  tlCardMeta.textContent = evt.category + ' • ' + evt.date;
+
+  if (isMobileTimeline()) {
+    // Mobile: card fixed at bottom center (CSS handles positioning)
+    tlCard.style.top = '';
+    tlCard.style.left = '';
+    tlCard.style.right = '';
+    tlCard.style.transform = '';
+  } else {
+    // Desktop: position card near pin
+    const rect = pinEl.getBoundingClientRect();
+    const isRight = rect.left > window.innerWidth / 2;
+    const isBottom = rect.top > window.innerHeight / 2;
+
+    tlCard.style.top = isBottom ? (rect.top - 10) + 'px' : (rect.bottom + 10) + 'px';
+    if (isBottom) {
+      tlCard.style.transform = 'translateY(-100%) scale(1)';
+    } else {
+      tlCard.style.transform = 'scale(1)';
+    }
+
+    if (isRight) {
+      tlCard.style.right = (window.innerWidth - rect.left + 16) + 'px';
+      tlCard.style.left = 'auto';
+    } else {
+      tlCard.style.left = (rect.right + 16) + 'px';
+      tlCard.style.right = 'auto';
+    }
+  }
+
+  tlCard.classList.add('open');
+
+  if (!reducedMotion) {
+    anime({
+      targets: tlCard,
+      opacity: [0, 1],
+      duration: 300,
+      easing: 'easeOutCubic'
+    });
+  }
+}
+
+tlCardClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (!reducedMotion) {
+    anime({
+      targets: tlCard,
+      opacity: [1, 0],
+      duration: 200,
+      easing: 'easeOutCubic',
+      complete: () => {
+        tlCard.classList.remove('open');
+        tlCard.style.opacity = '';
+      }
+    });
+  } else {
+    tlCard.classList.remove('open');
+    tlCard.style.opacity = '';
+  }
+});
+
+function updateTimeline(frac) {
+  const visible = frac >= BP.TIMELINE_START;
+  tlSection.classList.toggle('visible', visible);
+
+  if (!visible) {
+    tlCard.classList.remove('open');
+    tlCard.style.opacity = '';  // Clear inline opacity from anime.js
+    if (tlAnimatedIn) {
+      tlAnimatedIn = false;
+      document.querySelectorAll('.tl-pin').forEach(p => p.classList.remove('revealed'));
+    }
+    return;
+  }
+
+  // Apply correct path for desktop/mobile
+  const currentMobile = isMobileTimeline();
+  if (!tlPathLength || currentMobile !== tlIsMobile) {
+    applyTimelinePath();
+    tlPathLength = tlPath.getTotalLength();
+    tlPath.style.strokeDasharray = tlPathLength;
+    tlPath.style.strokeDashoffset = tlPathLength;
+    // Reposition existing pins if they exist
+    if (tlPinsCreated) repositionTLPins();
+  }
+
+  createTLPins();
+
+  const local = getLocalFraction(frac, BP.TIMELINE_START, BP.TIMELINE_END);
+
+  // Draw path progressively
+  const drawLen = local * tlPathLength;
+  tlPath.style.strokeDashoffset = tlPathLength - drawLen;
+
+  // Move dot along path
+  const point = tlPath.getPointAtLength(drawLen);
+  tlDot.setAttribute('cx', point.x);
+  tlDot.setAttribute('cy', point.y);
+
+  // Reveal pins as the path reaches them
+  document.querySelectorAll('.tl-pin').forEach(pin => {
+    const pinT = parseFloat(pin.dataset.t);
+    if (local >= pinT) {
+      pin.classList.add('revealed');
+    } else {
+      pin.classList.remove('revealed');
+    }
+  });
+
+  // Date indicator
+  tlDateIndicator.classList.toggle('visible', local > 0.05);
+
+  // Mark as animated in
+  if (!tlAnimatedIn && local > 0.02) {
+    tlAnimatedIn = true;
+  }
+}
+
+// ========================================
+// 13: Section Router
+// ========================================
+function updateSections(frac) {
+  // Video scrub
+  scrubVideo(frac);
+
+  // BP0.5: Clock tower analog overlay
+  updateClockSection(frac);
+
+  // BP1: NPC dialogue
+  updateBP1(frac);
+
+  // BP2: Gem menu
+  updateBP2(frac);
+
+  // Timeline: Winding path with event pins
+  updateTimeline(frac);
+
+  // HUD: always visible (no BP0 title screen)
+  hud.classList.add('visible');
+
+  // Scroll hint
+  if (frac > 0.02 && !scrollHintHidden) {
+    scrollHintHidden = true;
+    scrollHint.style.opacity = '0';
+  } else if (frac <= 0.02 && scrollHintHidden) {
+    scrollHintHidden = false;
+    scrollHint.style.opacity = '1';
+  }
+
+  // Active nav button
+  updateHUDActiveBtn(frac);
+}
+
+// ========================================
+// 14: Init & Event Binding
+// ========================================
+function initSections() {
+  initCRTNoise();
+
+  // Initial state
+  const frac = getScrollFraction();
+  updateSections(frac);
+
+  // Scroll listener
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => {
+        const f = getScrollFraction();
+        if (f !== lastScrollFrac) {
+          lastScrollFrac = f;
+          updateSections(f);
+        }
+        ticking = false;
+      });
+    }
+  }, { passive: true });
+
+  // Resize handler for responsive adjustments
+  window.addEventListener('resize', () => {
+    // Reset BP2 HUD on resize
+    bp2AnimatedIn = false;
+    // Re-calc timeline path (force re-detection of mobile/desktop)
+    tlPathLength = 0;
+    tlAnimatedIn = false;
+    // Reposition existing pins on resize
+    if (tlPinsCreated) {
+      applyTimelinePath();
+      tlPathLength = tlPath.getTotalLength();
+      tlPath.style.strokeDasharray = tlPathLength;
+      tlPath.style.strokeDashoffset = tlPathLength;
+      repositionTLPins();
+    }
+  });
+}
+
+// Prevent video from auto-playing
+video.pause();
+
+// iOS Safari: use window.innerHeight for vh units
+function setVH() {
+  document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+}
+setVH();
+window.addEventListener('resize', setVH);
+
+// ========================================
+// DEBUG: Scroll fraction overlay (remove before production)
+// ========================================
+(function addDebugOverlay() {
+  const dbg = document.createElement('div');
+  dbg.id = 'debug-scroll';
+  dbg.style.cssText = 'position:fixed;top:50px;left:16px;z-index:9999;font-family:monospace;font-size:13px;color:#0f0;background:rgba(0,0,0,0.85);padding:10px 14px;border-radius:6px;border:1px solid #0f0;pointer-events:none;line-height:1.8;white-space:pre;';
+  document.body.appendChild(dbg);
+
+  function getBPName(f) {
+    if (f <= 0.17) return 'BP0.5 Clock';
+    if (f <= 0.30) return 'BP1   NPC';
+    if (f <= 0.48) return '---   Video scrub';
+    if (f <= 0.65) return 'BP2   Radial';
+    if (f <= 0.85) return '---   Video scrub';
+    return 'TL    Timeline';
+  }
+
+  // --- Mouse coordinate tracker ---
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function update() {
+    const f = getScrollFraction();
+    const v = document.getElementById('bg-video');
+    const vTime = v ? v.currentTime.toFixed(2) : '?';
+    const vDur = (v && v.duration) ? v.duration.toFixed(2) : '?';
+    // Convert mouse position to percentage of viewport
+    const xPct = ((mouseX / window.innerWidth) * 100).toFixed(1);
+    const yPct = ((mouseY / window.innerHeight) * 100).toFixed(1);
+    dbg.textContent =
+      'scroll: ' + f.toFixed(4) + '\n' +
+      'video:  ' + vTime + 's / ' + vDur + 's\n' +
+      'active: ' + getBPName(f) + '\n' +
+      'cursor: x=' + xPct + '% y=' + yPct + '%';
+    requestAnimationFrame(update);
+  }
+  update();
+
+  // --- PATH DRAWING MODE ---
+  // Press 'D' to toggle draw mode. Click to place points. Press 'C' to copy path. Press 'X' to clear.
+  let drawMode = false;
+  let drawPoints = [];
+  const drawCanvas = document.createElement('canvas');
+  drawCanvas.id = 'draw-canvas';
+  drawCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:9998;pointer-events:none;';
+  document.body.appendChild(drawCanvas);
+  const drawCtx = drawCanvas.getContext('2d');
+
+  const drawLabel = document.createElement('div');
+  drawLabel.style.cssText = 'position:fixed;top:50px;right:16px;z-index:9999;font-family:monospace;font-size:12px;color:#ff0;background:rgba(0,0,0,0.85);padding:8px 12px;border-radius:6px;border:1px solid #ff0;display:none;line-height:1.6;white-space:pre;pointer-events:none;';
+  document.body.appendChild(drawLabel);
+
+  function resizeDrawCanvas() {
+    drawCanvas.width = window.innerWidth;
+    drawCanvas.height = window.innerHeight;
+    redrawPath();
+  }
+  window.addEventListener('resize', resizeDrawCanvas);
+  resizeDrawCanvas();
+
+  function redrawPath() {
+    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    if (drawPoints.length === 0) return;
+
+    // Draw lines between points
+    drawCtx.strokeStyle = '#ff0';
+    drawCtx.lineWidth = 3;
+    drawCtx.lineJoin = 'round';
+    drawCtx.setLineDash([8, 4]);
+    drawCtx.beginPath();
+    drawPoints.forEach((p, i) => {
+      const px = (p.x / 100) * drawCanvas.width;
+      const py = (p.y / 100) * drawCanvas.height;
+      if (i === 0) drawCtx.moveTo(px, py);
+      else drawCtx.lineTo(px, py);
+    });
+    drawCtx.stroke();
+    drawCtx.setLineDash([]);
+
+    // Draw dots at each point
+    drawPoints.forEach((p, i) => {
+      const px = (p.x / 100) * drawCanvas.width;
+      const py = (p.y / 100) * drawCanvas.height;
+      drawCtx.fillStyle = i === 0 ? '#0f0' : (i === drawPoints.length - 1 ? '#f00' : '#ff0');
+      drawCtx.beginPath();
+      drawCtx.arc(px, py, 6, 0, Math.PI * 2);
+      drawCtx.fill();
+      // Label
+      drawCtx.fillStyle = '#fff';
+      drawCtx.font = '10px monospace';
+      drawCtx.fillText(i + ': ' + p.x.toFixed(1) + ',' + p.y.toFixed(1), px + 10, py - 6);
+    });
+  }
+
+  function generateSVGPath() {
+    if (drawPoints.length < 2) return 'Need at least 2 points';
+    // Convert % to SVG coords (viewBox 0 0 1000 1000)
+    const svgPts = drawPoints.map(p => ({ x: p.x * 10, y: p.y * 10 }));
+    // Build a smooth cubic bezier path through the points
+    let d = 'M ' + svgPts[0].x.toFixed(0) + ',' + svgPts[0].y.toFixed(0);
+    for (let i = 1; i < svgPts.length; i++) {
+      const prev = svgPts[i - 1];
+      const curr = svgPts[i];
+      // Simple smooth curve using S command
+      const cx = (prev.x + curr.x) / 2;
+      const cy = prev.y + (curr.y - prev.y) * 0.5;
+      if (i === 1) {
+        d += ' C ' + prev.x.toFixed(0) + ',' + ((prev.y + curr.y) / 2).toFixed(0);
+        d += ' ' + cx.toFixed(0) + ',' + cy.toFixed(0);
+        d += ' ' + curr.x.toFixed(0) + ',' + curr.y.toFixed(0);
+      } else {
+        d += ' S ' + cx.toFixed(0) + ',' + cy.toFixed(0);
+        d += ' ' + curr.x.toFixed(0) + ',' + curr.y.toFixed(0);
+      }
+    }
+    return d;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'd' || e.key === 'D') {
+      drawMode = !drawMode;
+      drawCanvas.style.pointerEvents = drawMode ? 'auto' : 'none';
+      drawCanvas.style.cursor = drawMode ? 'crosshair' : '';
+      drawLabel.style.display = drawMode ? 'block' : 'none';
+      drawLabel.textContent = 'DRAW MODE ON\nClick to add points\nC = copy SVG path\nZ = undo last\nX = clear all\nD = toggle off\n\nPoints: ' + drawPoints.length;
+    }
+    if (e.key === 'x' || e.key === 'X') {
+      drawPoints = [];
+      redrawPath();
+      drawLabel.textContent = 'DRAW MODE ON\nCleared!\nPoints: 0';
+    }
+    if (e.key === 'z' || e.key === 'Z') {
+      drawPoints.pop();
+      redrawPath();
+      drawLabel.textContent = 'DRAW MODE ON\nUndo! Points: ' + drawPoints.length;
+    }
+    if (e.key === 'c' || e.key === 'C') {
+      const path = generateSVGPath();
+      navigator.clipboard.writeText(path).then(() => {
+        drawLabel.textContent = 'COPIED TO CLIPBOARD!\n\n' + path + '\n\nPoints (' + drawPoints.length + '):\n' + drawPoints.map((p,i) => i + ': x=' + p.x.toFixed(1) + '% y=' + p.y.toFixed(1) + '%').join('\n');
+      }).catch(() => {
+        drawLabel.textContent = 'PATH (copy manually):\n\n' + path + '\n\nPoints (' + drawPoints.length + '):\n' + drawPoints.map((p,i) => i + ': x=' + p.x.toFixed(1) + '% y=' + p.y.toFixed(1) + '%').join('\n');
+      });
+    }
+  });
+
+  drawCanvas.addEventListener('click', (e) => {
+    if (!drawMode) return;
+    const xPct = (e.clientX / window.innerWidth) * 100;
+    const yPct = (e.clientY / window.innerHeight) * 100;
+    drawPoints.push({ x: xPct, y: yPct });
+    redrawPath();
+    drawLabel.textContent = 'DRAW MODE ON\nClick to add points\nC = copy SVG path\nZ = undo last\nX = clear all\nD = toggle off\n\nPoints: ' + drawPoints.length + '\nLast: ' + xPct.toFixed(1) + '%, ' + yPct.toFixed(1) + '%';
+  });
+})();
+</script>
+
+</body>
+</html>
