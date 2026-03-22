@@ -476,7 +476,7 @@ body {
 #bp1-section {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 12;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -709,6 +709,10 @@ body {
   letter-spacing: 2px;
   border-radius: 0;
   pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255, 215, 0, 0.2);
+  min-height: 44px;
+  min-width: 44px;
   transition: background 0.15s, opacity 0.2s, box-shadow 0.15s;
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.15), inset 0 0 6px rgba(255, 215, 0, 0.05);
@@ -2430,6 +2434,7 @@ const video = document.getElementById('bg-video');
 let videoReady = false;
 let lastScrollFrac = -1;
 let videoSeeking = false;
+let videoUnlocked = false;
 
 // Desktop: canplaythrough is ideal
 video.addEventListener('canplaythrough', () => {
@@ -2437,7 +2442,6 @@ video.addEventListener('canplaythrough', () => {
 }, { once: true });
 
 // Mobile fallback: loadeddata with readyState >= 2 (HAVE_CURRENT_DATA) is enough
-// Mobile browsers rarely reach readyState 3/4 without user interaction
 video.addEventListener('loadeddata', () => {
   if (video.readyState >= 2) videoReady = true;
 }, { once: true });
@@ -2451,13 +2455,39 @@ video.addEventListener('loadedmetadata', () => {
       video.pause();
       video.currentTime = 0;
       videoReady = true;
+      videoUnlocked = true;
     }).catch(() => {
-      // Autoplay blocked — mark ready anyway, scrub will work once user scrolls
-      // (touch scroll counts as user gesture on most mobile browsers)
       if (video.readyState >= 1) videoReady = true;
     });
   }
 }, { once: true });
+
+// Mobile: unlock video on first user interaction (touch/scroll)
+function unlockVideoOnInteraction() {
+  if (videoUnlocked) return;
+  videoUnlocked = true;
+  const p = video.play();
+  if (p !== undefined) {
+    p.then(() => {
+      video.pause();
+      video.currentTime = 0;
+      videoReady = true;
+    }).catch(() => {});
+  }
+}
+document.addEventListener('touchstart', unlockVideoOnInteraction, { once: true, passive: true });
+document.addEventListener('scroll', unlockVideoOnInteraction, { once: true, passive: true });
+
+// On mobile, periodically check if video has buffered enough
+// and try to pre-buffer by seeking through key timestamps
+video.addEventListener('progress', () => {
+  if (video.buffered.length > 0) {
+    const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+    if (bufferedEnd >= (video.duration || 20) * 0.8) {
+      videoReady = true;
+    }
+  }
+});
 
 // Track seeking state to avoid queuing multiple seeks on mobile
 video.addEventListener('seeking', () => { videoSeeking = true; });
@@ -2466,7 +2496,18 @@ video.addEventListener('seeked', () => { videoSeeking = false; });
 function scrubVideo(frac) {
   if (!videoReady || !video.duration) return;
   // On mobile, skip if a seek is already in progress to avoid jank
-  if (videoSeeking) return;
+  // But reset seeking flag if stuck for too long (mobile can get stuck)
+  if (videoSeeking) {
+    if (!scrubVideo._seekStart) scrubVideo._seekStart = Date.now();
+    if (Date.now() - scrubVideo._seekStart > 500) {
+      videoSeeking = false;
+      scrubVideo._seekStart = null;
+    } else {
+      return;
+    }
+  } else {
+    scrubVideo._seekStart = null;
+  }
 
   let targetTime;
 
@@ -2500,13 +2541,19 @@ let loadProgress = 0;
 let loadingDone = false;
 const loadStartTime = Date.now();
 
+const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+// On mobile, slow down loading bar to give video more buffer time
+const loadSpeed = isMobileDevice ? 0.025 : 0.05;
+const minLoadTime = isMobileDevice ? 3000 : 1500;
+
 function simulateLoading() {
   if (loadingDone) return;
   if (loadProgress < 90) {
-    loadProgress += (90 - loadProgress) * 0.05;
+    loadProgress += (90 - loadProgress) * loadSpeed;
     loadingBar.style.width = loadProgress + '%';
   }
-  if (videoReady && loadProgress >= 89) {
+  const elapsed = Date.now() - loadStartTime;
+  if (videoReady && loadProgress >= 89 && elapsed >= minLoadTime) {
     finishLoading();
     return;
   }
@@ -2518,25 +2565,32 @@ function finishLoading() {
   loadingDone = true;
   loadingBar.style.width = '100%';
   const elapsed = Date.now() - loadStartTime;
-  const remaining = Math.max(0, 1500 - elapsed);
+  const remaining = Math.max(0, minLoadTime - elapsed);
   setTimeout(() => {
     loadingScreen.classList.add('hidden');
     initSections();
+    // On mobile, try to pre-seek to cache key frames after load
+    if (isMobileDevice && video.duration) {
+      setTimeout(() => {
+        // Briefly seek to a midpoint to help buffer ahead
+        const mid = video.duration * 0.5;
+        video.currentTime = mid;
+        setTimeout(() => { video.currentTime = 0; }, 100);
+      }, 500);
+    }
   }, remaining);
 }
 
 // Start loading simulation
 requestAnimationFrame(simulateLoading);
 
-// Fallback: force finish after 5 seconds on mobile (video may never fully buffer)
-// or 8 seconds on desktop
-const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+// Fallback: force finish after timeout (mobile gets more time to buffer)
 setTimeout(() => {
   if (!loadingDone) {
     videoReady = true;
     finishLoading();
   }
-}, isMobileDevice ? 5000 : 8000);
+}, isMobileDevice ? 8000 : 8000);
 
 // ========================================
 // 5: CRT Noise Canvas
@@ -2776,6 +2830,13 @@ dialogPrev.addEventListener('click', () => {
   }
   if (currentSlide > 0) {
     showSlide(currentSlide - 1);
+  }
+});
+
+// Tap on dialog text area to skip typewriter on mobile
+dialogText.addEventListener('click', () => {
+  if (isTyping) {
+    finishTyping();
   }
 });
 
